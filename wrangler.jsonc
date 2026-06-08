@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "engineview",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-01",
+
+  // Static UI is served from ./public; the Worker handles /api/* and falls back
+  // to assets for everything else.
+  "assets": { "directory": "./public", "binding": "ASSETS" },
+
+  // Non-secret config. Fill these in for your account.
+  // CF_API_TOKEN and DASHBOARD_PASSWORD are secrets, set with `wrangler secret put`.
+  "vars": {
+    "CF_ACCOUNT_ID": "",
+    "AE_DATASET": ""
+  },
+
+  // Saved queries (and, later, dashboards/panels) live here.
+  // Run `wrangler d1 create engineview` and paste the id below.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "engineview",
+      "database_id": ""
+    }
+  ]
+}
