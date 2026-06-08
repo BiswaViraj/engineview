@@ -1,49 +1,66 @@
 # EngineView
 
-A self-hosted dashboard for [Cloudflare Analytics Engine](https://developers.cloudflare.com/analytics/analytics-engine/).
+A multi-user dashboard for [Cloudflare Analytics Engine](https://developers.cloudflare.com/analytics/analytics-engine/).
 Cloudflare gives you a powerful time-series store but no UI and no way to save
-queries. EngineView is a small app you deploy on your own Cloudflare account to
-run SQL against your datasets, save the queries you care about, and (soon) chart
-them.
+queries. EngineView lets people sign up, connect their own Cloudflare account,
+run SQL against their datasets, save the queries they care about, and (soon)
+chart them on dashboards.
 
-It is self-hosted by design: your Cloudflare API token stays a server-side secret
-on your own Worker and is never exposed to the browser or sent to anyone else.
+Each user brings their own Cloudflare account. API tokens are encrypted at rest
+and only ever decrypted on the server to run a query, so a token is never sent
+to the browser or shared between users.
 
 ## Status
 
-Early. v1 is a query runner with saved queries and a results table. Charts and
-multi-panel dashboards are planned.
+Early. Multi-user auth and per-user Cloudflare connections are in place. The
+query runner, charts, and multi-panel dashboards are being built next.
+
+## Stack
+
+- [Nuxt 4](https://nuxt.com) (Vue 3) for the app and server API
+- [better-auth](https://better-auth.com) for email and password accounts
+- [Postgres](https://www.postgresql.org) via [Drizzle ORM](https://orm.drizzle.team)
 
 ## How it works
 
-- A Cloudflare Worker serves the UI and a tiny API.
-- `POST /api/query` forwards your SQL to the Analytics Engine SQL API using the
-  Worker's secret token and returns the rows. The token never leaves the Worker.
-- Saved queries live in a D1 database.
-- The dashboard is gated by a single password (it is your own private data).
+- Users sign up and log in (better-auth, signed session cookies).
+- Each user adds one or more Cloudflare connections (account id + API token).
+  The token is encrypted with AES-256-GCM before it is stored.
+- A query is sent to the server, which decrypts the relevant token, calls the
+  Analytics Engine SQL API, and returns the rows. The token never leaves the
+  server.
+- Saved queries and dashboards are stored in Postgres, scoped to each user.
 
 ## Setup
 
-Prerequisites: a Cloudflare account using Analytics Engine, Node 20+, and the
-Wrangler CLI.
+Prerequisites: Node 20+, a Postgres database, and a Cloudflare account using
+Analytics Engine.
 
 ```bash
 npm install
 
-# 1. Create the D1 database and apply the schema
-npx wrangler d1 create engineview         # copy the database_id into wrangler.jsonc
+# 1. Configure the environment
+cp .env.example .env
+#    Set DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL and ENCRYPTION_KEY.
+#    Generate secrets with: openssl rand -hex 32
+
+# 2. Apply the database schema
 npm run db:migrate
 
-# 2. Set your account id and dataset in wrangler.jsonc (vars), then set secrets
-npx wrangler secret put CF_API_TOKEN      # token scoped to "Account Analytics: Read"
-npx wrangler secret put DASHBOARD_PASSWORD
-
-# 3. Run locally (copy .dev.vars.example to .dev.vars and fill it in first)
+# 3. Run locally
 npm run dev
-
-# 4. Deploy to your account
-npm run deploy
 ```
+
+A local Postgres is easy to start with Docker:
+
+```bash
+docker run -d --name engineview-pg -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=engineview -p 5432:5432 postgres:16
+```
+
+On macOS, if `npm run dev` fails with a `vite-node` socket error (`EINVAL`),
+your `$TMPDIR` path is too long for a unix socket. Run it with a short temp dir:
+`TMPDIR=/tmp npm run dev`.
 
 ## License
 

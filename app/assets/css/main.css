@@ -1,0 +1,151 @@
+:root {
+  color-scheme: dark;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #0b0f14;
+  color: #e6edf3;
+}
+
+a {
+  color: #58a6ff;
+}
+
+.app-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid #1c2530;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-header nav {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.app-header .brand {
+  text-decoration: none;
+  color: inherit;
+}
+
+main {
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.card {
+  background: #11161d;
+  border: 1px solid #1c2530;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.stack {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-wrap {
+  max-width: 360px;
+  margin: 8vh auto 0;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: #b9c2cc;
+}
+
+textarea,
+input,
+select {
+  width: 100%;
+  background: #0b0f14;
+  color: inherit;
+  border: 1px solid #1c2530;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+}
+
+textarea {
+  min-height: 120px;
+  font-family: ui-monospace, monospace;
+}
+
+button {
+  background: #1f6feb;
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+button.ghost {
+  background: transparent;
+  border: 1px solid #1c2530;
+  color: #e6edf3;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+
+th,
+td {
+  border: 1px solid #1c2530;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+th {
+  background: #11161d;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.muted {
+  color: #8b949e;
+  font-size: 13px;
+}
+
+.error {
+  color: #f85149;
+  font-size: 13px;
+  white-space: pre-wrap;
+  margin: 0;
+  font-family: ui-monospace, monospace;
+}
