@@ -20,10 +20,13 @@ runner with charts, and multi-panel dashboards are all in place.
 - [Nuxt 4](https://nuxt.com) (Vue 3) for the app and server API
 - [better-auth](https://better-auth.com) for email and password accounts
 - [Postgres](https://www.postgresql.org) via [Drizzle ORM](https://orm.drizzle.team)
+- [Resend](https://resend.com) for verification and password-reset email
 
 ## How it works
 
-- Users sign up and log in (better-auth, signed session cookies).
+- Users sign up and log in (better-auth, signed session cookies). Email
+  addresses are verified before first sign in, and passwords can be reset, with
+  the emails sent through Resend.
 - Each user adds one or more Cloudflare connections (account id + API token).
   The token is encrypted with AES-256-GCM before it is stored.
 - A query is sent to the server, which decrypts the relevant token, calls the

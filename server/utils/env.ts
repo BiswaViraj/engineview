@@ -10,7 +10,12 @@ const REQUIRED = [
 ] as const;
 
 export function validateEnv(env: Record<string, string | undefined> = process.env): void {
-  const missing = REQUIRED.filter((key) => !env[key]);
+  const missing: string[] = REQUIRED.filter((key) => !env[key]);
+  // Email verification is enforced, so a real provider is required in
+  // production. In development a missing key just logs links to the console.
+  if (env.NODE_ENV === "production" && !env.RESEND_API_KEY) {
+    missing.push("RESEND_API_KEY");
+  }
   if (missing.length > 0) {
     throw new Error(
       `Missing required environment variables: ${missing.join(", ")}. See .env.example.`,

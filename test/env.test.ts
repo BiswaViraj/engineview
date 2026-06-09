@@ -23,4 +23,11 @@ describe("validateEnv", () => {
     expect(() => validateEnv({ ...VALID, ENCRYPTION_KEY: "tooshort" })).toThrow(/64 hex/);
     expect(() => validateEnv({ ...VALID, ENCRYPTION_KEY: "z".repeat(64) })).toThrow(/64 hex/);
   });
+
+  it("requires RESEND_API_KEY in production", () => {
+    expect(() => validateEnv({ ...VALID, NODE_ENV: "production" })).toThrow(/RESEND_API_KEY/);
+    expect(() =>
+      validateEnv({ ...VALID, NODE_ENV: "production", RESEND_API_KEY: "re_test" }),
+    ).not.toThrow();
+  });
 });

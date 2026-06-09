@@ -6,6 +6,7 @@ const email = ref("");
 const password = ref("");
 const error = ref("");
 const busy = ref(false);
+const sent = ref(false);
 
 async function submit() {
   busy.value = true;
@@ -20,35 +21,50 @@ async function submit() {
     error.value = err.message || "Could not create the account.";
     return;
   }
-  await navigateTo("/");
+  // Email verification is required, so there is no session yet. Tell the user to
+  // check their inbox rather than sending them to a gated page.
+  sent.value = true;
 }
 </script>
 
 <template>
   <div class="auth-wrap card stack">
-    <h2 style="margin: 0">Create your account</h2>
-    <form class="stack" @submit.prevent="submit">
-      <label>
-        Name
-        <input v-model="name" type="text" required autocomplete="name" />
-      </label>
-      <label>
-        Email
-        <input v-model="email" type="email" required autocomplete="email" />
-      </label>
-      <label>
-        Password
-        <input
-          v-model="password"
-          type="password"
-          required
-          minlength="8"
-          autocomplete="new-password"
-        />
-      </label>
-      <button type="submit" :disabled="busy">{{ busy ? "Creating..." : "Create account" }}</button>
-      <p v-if="error" class="error">{{ error }}</p>
-    </form>
-    <p class="muted">Already have an account? <NuxtLink to="/login">Sign in</NuxtLink></p>
+    <template v-if="sent">
+      <h2 style="margin: 0">Check your email</h2>
+      <p class="muted">
+        We sent a verification link to <strong>{{ email }}</strong
+        >. Click it to activate your account, then sign in.
+      </p>
+      <NuxtLink to="/login">Back to sign in</NuxtLink>
+    </template>
+
+    <template v-else>
+      <h2 style="margin: 0">Create your account</h2>
+      <form class="stack" @submit.prevent="submit">
+        <label>
+          Name
+          <input v-model="name" type="text" required autocomplete="name" />
+        </label>
+        <label>
+          Email
+          <input v-model="email" type="email" required autocomplete="email" />
+        </label>
+        <label>
+          Password
+          <input
+            v-model="password"
+            type="password"
+            required
+            minlength="8"
+            autocomplete="new-password"
+          />
+        </label>
+        <button type="submit" :disabled="busy">
+          {{ busy ? "Creating..." : "Create account" }}
+        </button>
+        <p v-if="error" class="error">{{ error }}</p>
+      </form>
+      <p class="muted">Already have an account? <NuxtLink to="/login">Sign in</NuxtLink></p>
+    </template>
   </div>
 </template>
