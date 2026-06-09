@@ -3,6 +3,8 @@ import { db } from "../../utils/db";
 import { cloudflareConnection } from "../../database/schema";
 import { requireUser } from "../../utils/session";
 import { encrypt } from "../../utils/crypto";
+import { parseBody } from "../../utils/validate";
+import { connectionUpdateSchema } from "../../utils/schemas";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -13,19 +15,13 @@ export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
   if (!id || !UUID.test(id)) throw createError({ statusCode: 404, statusMessage: "Not found" });
 
-  const body = await readBody<{
-    label?: string;
-    accountId?: string;
-    apiToken?: string;
-    defaultDataset?: string;
-  }>(event);
+  const body = await parseBody(event, connectionUpdateSchema);
 
   const updates: Record<string, unknown> = { updatedAt: new Date() };
-  if (body.label !== undefined) updates.label = body.label.trim();
-  if (body.accountId !== undefined) updates.accountId = body.accountId.trim();
-  if (body.defaultDataset !== undefined)
-    updates.defaultDataset = body.defaultDataset.trim() || null;
-  if (body.apiToken) updates.apiTokenEncrypted = encrypt(body.apiToken.trim());
+  if (body.label !== undefined) updates.label = body.label;
+  if (body.accountId !== undefined) updates.accountId = body.accountId;
+  if (body.defaultDataset !== undefined) updates.defaultDataset = body.defaultDataset || null;
+  if (body.apiToken) updates.apiTokenEncrypted = encrypt(body.apiToken);
 
   const [row] = await db
     .update(cloudflareConnection)

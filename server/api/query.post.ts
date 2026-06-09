@@ -4,6 +4,8 @@ import { cloudflareConnection } from "../database/schema";
 import { requireUser } from "../utils/session";
 import { decrypt } from "../utils/crypto";
 import { expandTimeMacro } from "../utils/macros";
+import { parseBody } from "../utils/validate";
+import { queryRunSchema } from "../utils/schemas";
 
 // Run SQL against a connection's Analytics Engine. The token is decrypted only
 // here, server-side, and used to call the Cloudflare SQL API. It is never sent
@@ -11,15 +13,7 @@ import { expandTimeMacro } from "../utils/macros";
 // omits it (so the default applies) and dashboards pass their shared range.
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const { connectionId, sql, timeRange } = await readBody<{
-    connectionId?: string;
-    sql?: string;
-    timeRange?: string;
-  }>(event);
-
-  if (!connectionId || !sql?.trim()) {
-    throw createError({ statusCode: 400, statusMessage: "connectionId and sql are required" });
-  }
+  const { connectionId, sql, timeRange } = await parseBody(event, queryRunSchema);
 
   const [conn] = await db
     .select()

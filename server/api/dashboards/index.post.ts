@@ -1,12 +1,12 @@
 import { db } from "../../utils/db";
 import { dashboard } from "../../database/schema";
 import { requireUser } from "../../utils/session";
+import { parseBody } from "../../utils/validate";
+import { dashboardCreateSchema } from "../../utils/schemas";
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const body = await readBody<{ name?: string }>(event);
-  const name = body.name?.trim();
-  if (!name) throw createError({ statusCode: 400, statusMessage: "name is required" });
+  const { name } = await parseBody(event, dashboardCreateSchema);
 
   const [row] = await db.insert(dashboard).values({ userId: user.id, name }).returning({
     id: dashboard.id,

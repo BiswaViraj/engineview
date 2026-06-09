@@ -1,24 +1,20 @@
 import { db } from "../../utils/db";
 import { savedQuery } from "../../database/schema";
 import { requireUser } from "../../utils/session";
+import { parseBody } from "../../utils/validate";
+import { savedQueryCreateSchema } from "../../utils/schemas";
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const body = await readBody<{ name?: string; sql?: string; connectionId?: string }>(event);
-
-  const name = body.name?.trim();
-  const sql = body.sql?.trim();
-  if (!name || !sql) {
-    throw createError({ statusCode: 400, statusMessage: "name and sql are required" });
-  }
+  const body = await parseBody(event, savedQueryCreateSchema);
 
   const [row] = await db
     .insert(savedQuery)
     .values({
       userId: user.id,
-      name,
-      sql,
-      connectionId: body.connectionId || null,
+      name: body.name,
+      sql: body.sql,
+      connectionId: body.connectionId ?? null,
     })
     .returning({
       id: savedQuery.id,
