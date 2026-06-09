@@ -90,7 +90,7 @@ async function toggleWidth() {
     <ClientOnly v-else>
       <ChartView
         :rows="rows"
-        :type="(panel.chartType as ChartType)"
+        :type="panel.chartType as ChartType"
         :x-column="axes.xColumn"
         :y-columns="axes.yColumns"
         :height="panel.posH * 28"

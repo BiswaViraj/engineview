@@ -54,7 +54,8 @@ async function submit() {
     await refresh();
   } catch (e: unknown) {
     const err = e as { data?: { statusMessage?: string }; statusMessage?: string };
-    error.value = err?.data?.statusMessage || err?.statusMessage || "Could not save the connection.";
+    error.value =
+      err?.data?.statusMessage || err?.statusMessage || "Could not save the connection.";
   } finally {
     busy.value = false;
   }
@@ -102,7 +103,9 @@ async function remove(id: string) {
             v-model="form.apiToken"
             type="password"
             :required="!editing"
-            :placeholder="editing ? 'Leave blank to keep the current token' : 'Analytics Engine read token'"
+            :placeholder="
+              editing ? 'Leave blank to keep the current token' : 'Analytics Engine read token'
+            "
           />
         </label>
         <label>

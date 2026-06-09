@@ -1,0 +1,8 @@
+.nuxt
+.output
+.data
+.nitro
+dist
+node_modules
+server/database/migrations
+package-lock.json

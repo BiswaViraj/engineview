@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { authClient, signOut, useSession } from "~/lib/auth-client";
+import { authClient, signOut } from "~/lib/auth-client";
 
 const { data: session } = await authClient.useSession(useFetch);
 

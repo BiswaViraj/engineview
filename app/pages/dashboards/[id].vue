@@ -99,8 +99,8 @@ async function removeDashboard() {
         <button :disabled="adding" @click="addPanel">Add panel</button>
       </div>
       <p class="muted" style="margin: 0">
-        Tip: use the <code>$SINCE</code> token in a query (e.g.
-        <code>timestamp &gt; $SINCE</code>) and it expands to the dashboard's time range.
+        Tip: use the <code>$SINCE</code> token in a query (e.g. <code>timestamp &gt; $SINCE</code>)
+        and it expands to the dashboard's time range.
       </p>
     </div>
 

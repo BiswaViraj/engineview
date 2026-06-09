@@ -1,12 +1,4 @@
-import {
-  pgTable,
-  text,
-  boolean,
-  timestamp,
-  uuid,
-  integer,
-  jsonb,
-} from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, timestamp, uuid, integer, jsonb } from "drizzle-orm/pg-core";
 
 // --- better-auth core tables ---------------------------------------------
 // Field (property) names must match better-auth's model fields so the Drizzle

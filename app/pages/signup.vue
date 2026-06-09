@@ -38,7 +38,13 @@ async function submit() {
       </label>
       <label>
         Password
-        <input v-model="password" type="password" required minlength="8" autocomplete="new-password" />
+        <input
+          v-model="password"
+          type="password"
+          required
+          minlength="8"
+          autocomplete="new-password"
+        />
       </label>
       <button type="submit" :disabled="busy">{{ busy ? "Creating..." : "Create account" }}</button>
       <p v-if="error" class="error">{{ error }}</p>

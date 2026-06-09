@@ -26,8 +26,7 @@ export function decrypt(payload: string, keyHex = process.env.ENCRYPTION_KEY): s
   if (!ivB64 || !tagB64 || !ctB64) throw new Error("malformed ciphertext");
   const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(ivB64, "base64"));
   decipher.setAuthTag(Buffer.from(tagB64, "base64"));
-  return Buffer.concat([
-    decipher.update(Buffer.from(ctB64, "base64")),
-    decipher.final(),
-  ]).toString("utf8");
+  return Buffer.concat([decipher.update(Buffer.from(ctB64, "base64")), decipher.final()]).toString(
+    "utf8",
+  );
 }

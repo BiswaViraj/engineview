@@ -28,7 +28,9 @@ interface QueryResult {
 
 const SQL_KEY = "ev_sql";
 
-const { data: connections } = await useFetch<Connection[]>("/api/connections", { default: () => [] });
+const { data: connections } = await useFetch<Connection[]>("/api/connections", {
+  default: () => [],
+});
 const { data: saved, refresh: refreshSaved } = await useFetch<SavedQuery[]>("/api/queries", {
   default: () => [],
 });

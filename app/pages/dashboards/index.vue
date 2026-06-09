@@ -17,7 +17,10 @@ async function create() {
   if (!trimmed || busy.value) return;
   busy.value = true;
   try {
-    const d = await $fetch<Dashboard>("/api/dashboards", { method: "POST", body: { name: trimmed } });
+    const d = await $fetch<Dashboard>("/api/dashboards", {
+      method: "POST",
+      body: { name: trimmed },
+    });
     await navigateTo(`/dashboards/${d.id}`);
   } finally {
     busy.value = false;

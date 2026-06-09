@@ -33,8 +33,6 @@ describe("time-range macro", () => {
 
   it("does not allow injection through the range value", () => {
     // A malicious range cannot smuggle SQL; it just falls back to the default.
-    expect(sinceExpression("1 DAY'; DROP TABLE user; --")).toBe(
-      "NOW() - INTERVAL '24' HOUR",
-    );
+    expect(sinceExpression("1 DAY'; DROP TABLE user; --")).toBe("NOW() - INTERVAL '24' HOUR");
   });
 });

@@ -18,15 +18,12 @@ export default defineEventHandler(async (event) => {
   if (body.title !== undefined) updates.title = body.title.trim();
   if (body.chartType !== undefined) updates.chartType = body.chartType;
   if (body.xColumn !== undefined) updates.xColumn = body.xColumn || null;
-  if (body.yColumns !== undefined) updates.yColumns = Array.isArray(body.yColumns) ? body.yColumns : [];
+  if (body.yColumns !== undefined)
+    updates.yColumns = Array.isArray(body.yColumns) ? body.yColumns : [];
   if (typeof body.posW === "number") updates.posW = body.posW;
   if (typeof body.posH === "number") updates.posH = body.posH;
   if (Object.keys(updates).length === 0) return existing;
 
-  const [row] = await db
-    .update(panel)
-    .set(updates)
-    .where(eq(panel.id, existing.id))
-    .returning();
+  const [row] = await db.update(panel).set(updates).where(eq(panel.id, existing.id)).returning();
   return row;
 });
