@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { defaultAxes, type ChartType } from "~/lib/chart";
+
 definePageMeta({ middleware: "auth" });
 
 interface Connection {
@@ -46,6 +48,32 @@ const name = ref("");
 const result = ref<QueryResult | null>(null);
 const running = ref(false);
 const error = ref("");
+
+const view = ref<"table" | "chart">("table");
+const chartType = ref<ChartType>("line");
+const xColumn = ref("");
+const yColumns = ref<string[]>([]);
+
+const resultColumns = computed<string[]>(() => {
+  if (!result.value) return [];
+  return result.value.meta.length
+    ? result.value.meta.map((m) => m.name)
+    : Object.keys(result.value.rows[0] ?? {});
+});
+
+watch(result, (r) => {
+  if (r) {
+    const axes = defaultAxes(r.meta, r.rows);
+    xColumn.value = axes.xColumn;
+    yColumns.value = axes.yColumns;
+  }
+});
+
+function toggleY(col: string) {
+  yColumns.value = yColumns.value.includes(col)
+    ? yColumns.value.filter((c) => c !== col)
+    : [...yColumns.value, col];
+}
 
 onMounted(() => {
   sql.value = localStorage.getItem(SQL_KEY) ?? "";
@@ -153,14 +181,62 @@ async function remove(id: string) {
         <button class="ghost" @click="save">Save query</button>
       </div>
 
-      <div>
+      <div v-if="error || result" class="stack">
         <pre v-if="error" class="error">{{ error }}</pre>
-        <ResultsTable
-          v-else-if="result"
-          :rows="result.rows"
-          :meta="result.meta"
-          :elapsed-ms="result.elapsedMs"
-        />
+        <template v-else-if="result">
+          <div class="row">
+            <button :class="{ ghost: view !== 'table' }" @click="view = 'table'">Table</button>
+            <button :class="{ ghost: view !== 'chart' }" @click="view = 'chart'">Chart</button>
+          </div>
+
+          <ResultsTable
+            v-if="view === 'table'"
+            :rows="result.rows"
+            :meta="result.meta"
+            :elapsed-ms="result.elapsedMs"
+          />
+
+          <div v-else class="stack">
+            <div class="row">
+              <label style="flex: 0 0 auto">
+                Type
+                <select v-model="chartType">
+                  <option value="line">line</option>
+                  <option value="area">area</option>
+                  <option value="bar">bar</option>
+                </select>
+              </label>
+              <label style="flex: 0 0 auto">
+                X axis
+                <select v-model="xColumn">
+                  <option v-for="c in resultColumns" :key="c" :value="c">{{ c }}</option>
+                </select>
+              </label>
+              <span class="muted">Series:</span>
+              <label
+                v-for="c in resultColumns.filter((col) => col !== xColumn)"
+                :key="c"
+                style="flex-direction: row; align-items: center; gap: 6px"
+              >
+                <input
+                  type="checkbox"
+                  style="width: auto"
+                  :checked="yColumns.includes(c)"
+                  @change="toggleY(c)"
+                />
+                {{ c }}
+              </label>
+            </div>
+            <ClientOnly>
+              <ChartView
+                :rows="result.rows"
+                :type="chartType"
+                :x-column="xColumn"
+                :y-columns="yColumns"
+              />
+            </ClientOnly>
+          </div>
+        </template>
       </div>
 
       <div class="card stack">
