@@ -109,6 +109,9 @@ export const panel = pgTable("panel", {
     .references(() => dashboard.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   queryId: uuid("query_id").references(() => savedQuery.id, { onDelete: "set null" }),
+  connectionId: uuid("connection_id").references(() => cloudflareConnection.id, {
+    onDelete: "set null",
+  }),
   sql: text("sql").notNull(),
   chartType: text("chart_type").notNull().default("line"),
   xColumn: text("x_column"),

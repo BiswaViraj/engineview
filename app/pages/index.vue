@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { defaultAxes, type ChartType } from "~/lib/chart";
+import { extractApiError } from "~/lib/errors";
 
 definePageMeta({ middleware: "auth" });
 
@@ -87,14 +88,6 @@ function sampleQuery() {
   sql.value = `SELECT\n  blob1 AS dimension,\n  SUM(_sample_interval) AS count\nFROM ${ds}\nWHERE timestamp > NOW() - INTERVAL '24' HOUR\nGROUP BY dimension\nORDER BY count DESC\nLIMIT 100`;
 }
 
-function extractError(e: unknown): string {
-  const data = (e as { data?: { errors?: { code?: number; message?: string }[]; error?: string; statusMessage?: string } })?.data;
-  if (data?.errors?.length) return data.errors.map((x) => x.message ?? `code ${x.code}`).join("\n");
-  if (data?.error) return data.error;
-  if (data?.statusMessage) return data.statusMessage;
-  return (e as Error)?.message || "Query failed.";
-}
-
 async function run() {
   if (!sql.value.trim() || running.value) return;
   if (!selectedConnectionId.value) {
@@ -116,7 +109,7 @@ async function run() {
       elapsedMs: Math.round(performance.now() - started),
     };
   } catch (e) {
-    error.value = extractError(e);
+    error.value = extractApiError(e);
   } finally {
     running.value = false;
   }

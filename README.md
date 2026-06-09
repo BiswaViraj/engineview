@@ -12,8 +12,8 @@ to the browser or shared between users.
 
 ## Status
 
-Early. Multi-user auth and per-user Cloudflare connections are in place. The
-query runner, charts, and multi-panel dashboards are being built next.
+Working. Multi-user accounts, per-user Cloudflare connections, the SQL query
+runner with charts, and multi-panel dashboards are all in place.
 
 ## Stack
 
@@ -30,6 +30,10 @@ query runner, charts, and multi-panel dashboards are being built next.
   Analytics Engine SQL API, and returns the rows. The token never leaves the
   server.
 - Saved queries and dashboards are stored in Postgres, scoped to each user.
+- A result can be charted (line, area or bar). Saved queries become dashboard
+  panels, laid out in a grid with a shared time range. A query can use the
+  `$SINCE` token (e.g. `timestamp > $SINCE`), which expands to the dashboard's
+  selected range.
 
 ## Setup
 

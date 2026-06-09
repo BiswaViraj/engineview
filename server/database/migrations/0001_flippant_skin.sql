@@ -1,0 +1,2 @@
+ALTER TABLE "panel" ADD COLUMN "connection_id" uuid;--> statement-breakpoint
+ALTER TABLE "panel" ADD CONSTRAINT "panel_connection_id_cloudflare_connection_id_fk" FOREIGN KEY ("connection_id") REFERENCES "public"."cloudflare_connection"("id") ON DELETE set null ON UPDATE no action;
