@@ -66,6 +66,42 @@ On macOS, if `npm run dev` fails with a `vite-node` socket error (`EINVAL`),
 your `$TMPDIR` path is too long for a unix socket. Run it with a short temp dir:
 `TMPDIR=/tmp npm run dev`.
 
+## Scripts
+
+- `npm run dev` / `npm run build` / `npm run preview`
+- `npm run db:migrate` (apply migrations), `npm run db:generate` (after a schema change)
+- `npm run lint`, `npm run format`, `npm run typecheck`, `npm test`
+
+## Deploy
+
+### Docker Compose
+
+The simplest way to run the whole stack (Postgres, migrations, app):
+
+```bash
+export BETTER_AUTH_SECRET=$(openssl rand -hex 32)
+export ENCRYPTION_KEY=$(openssl rand -hex 32)
+docker compose up --build
+```
+
+The app is served on `http://localhost:3000`. A `migrate` step runs before the
+app starts, and `GET /api/health` reports database connectivity.
+
+### Manual
+
+```bash
+npm ci
+npm run build
+npm run db:migrate          # against your production DATABASE_URL
+node .output/server/index.mjs
+```
+
+Set `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` and `ENCRYPTION_KEY`
+in the environment. The server validates them on startup and exits with a clear
+message if any are missing. Run it behind a reverse proxy that terminates TLS and
+forwards the client IP (`x-forwarded-for` or `cf-connecting-ip`) so rate limiting
+works.
+
 ## License
 
 MIT. See [LICENSE](./LICENSE).

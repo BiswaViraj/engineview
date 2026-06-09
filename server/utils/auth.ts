@@ -32,5 +32,9 @@ export const auth = betterAuth({
   advanced: {
     // Send Secure cookies when served over HTTPS.
     useSecureCookies: baseURL?.startsWith("https://") ?? false,
+    // Behind a reverse proxy, read the real client IP so rate limiting works.
+    ipAddress: {
+      ipAddressHeaders: ["cf-connecting-ip", "x-forwarded-for"],
+    },
   },
 });
