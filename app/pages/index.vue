@@ -1,387 +1,484 @@
 <script setup lang="ts">
-import { defaultAxes, type ChartType } from "~/lib/chart";
-import { extractApiError } from "~/lib/errors";
+import { authClient } from "~/lib/auth-client";
+import { GITHUB_URL } from "~/lib/site";
 
-definePageMeta({ middleware: "auth" });
+definePageMeta({ layout: "marketing" });
 
-interface Connection {
-  id: string;
-  label: string;
-  accountId: string;
-  defaultDataset: string | null;
-}
-interface SavedQuery {
-  id: string;
-  name: string;
-  sql: string;
-  connectionId: string | null;
-}
-interface ColumnMeta {
-  name: string;
-  type: string;
-}
-interface QueryResult {
-  rows: Record<string, unknown>[];
-  meta: ColumnMeta[];
-  elapsedMs: number;
-}
-
-const SQL_KEY = "ev_sql";
-
-const { data: connections } = await useFetch<Connection[]>("/api/connections", {
-  default: () => [],
-});
-const { data: saved, refresh: refreshSaved } = await useFetch<SavedQuery[]>("/api/queries", {
-  default: () => [],
+useHead({
+  title: "EngineView — a dashboard for Cloudflare Analytics Engine",
 });
 
-const selectedConnectionId = ref<string>("");
-watchEffect(() => {
-  if (!selectedConnectionId.value && connections.value?.length) {
-    selectedConnectionId.value = connections.value[0]!.id;
-  }
-});
+const { data: session } = await authClient.useSession(useFetch);
 
-const selectedConnection = computed(() =>
-  connections.value?.find((c) => c.id === selectedConnectionId.value),
-);
-
-const sql = ref("");
-const name = ref("");
-const result = ref<QueryResult | null>(null);
-const running = ref(false);
-const error = ref("");
-
-const view = ref<"table" | "chart">("table");
-const chartType = ref<ChartType>("line");
-const xColumn = ref("");
-const yColumns = ref<string[]>([]);
-
-const resultColumns = computed<string[]>(() => {
-  if (!result.value) return [];
-  return result.value.meta.length
-    ? result.value.meta.map((m) => m.name)
-    : Object.keys(result.value.rows[0] ?? {});
-});
-
-watch(result, (r) => {
-  if (r) {
-    const axes = defaultAxes(r.meta, r.rows);
-    xColumn.value = axes.xColumn;
-    yColumns.value = axes.yColumns;
-  }
-});
-
-function toggleY(col: string) {
-  yColumns.value = yColumns.value.includes(col)
-    ? yColumns.value.filter((c) => c !== col)
-    : [...yColumns.value, col];
-}
-
-onMounted(() => {
-  sql.value = localStorage.getItem(SQL_KEY) ?? "";
-});
-watch(sql, (v) => {
-  if (import.meta.client) localStorage.setItem(SQL_KEY, v);
-});
-
-function sampleQuery() {
-  const ds = selectedConnection.value?.defaultDataset || "your_dataset";
-  sql.value = `SELECT\n  blob1 AS dimension,\n  SUM(_sample_interval) AS count\nFROM ${ds}\nWHERE timestamp > NOW() - INTERVAL '24' HOUR\nGROUP BY dimension\nORDER BY count DESC\nLIMIT 100`;
-}
-
-async function run() {
-  if (!sql.value.trim() || running.value) return;
-  if (!selectedConnectionId.value) {
-    error.value = "Add and select a Cloudflare connection first.";
-    return;
-  }
-  running.value = true;
-  error.value = "";
-  result.value = null;
-  const started = performance.now();
-  try {
-    const body = await $fetch<{ data?: Record<string, unknown>[]; meta?: ColumnMeta[] }>(
-      "/api/query",
-      { method: "POST", body: { connectionId: selectedConnectionId.value, sql: sql.value } },
-    );
-    result.value = {
-      rows: body.data ?? [],
-      meta: body.meta ?? [],
-      elapsedMs: Math.round(performance.now() - started),
-    };
-  } catch (e) {
-    error.value = extractApiError(e);
-  } finally {
-    running.value = false;
-  }
-}
-
-async function save() {
-  const trimmed = name.value.trim();
-  if (!trimmed || !sql.value.trim()) return;
-  await $fetch("/api/queries", {
-    method: "POST",
-    body: { name: trimmed, sql: sql.value, connectionId: selectedConnectionId.value || null },
-  });
-  name.value = "";
-  await refreshSaved();
-}
-
-function load(q: SavedQuery) {
-  sql.value = q.sql;
-  if (q.connectionId && connections.value?.some((c) => c.id === q.connectionId)) {
-    selectedConnectionId.value = q.connectionId;
-  }
-}
-
-async function remove(id: string) {
-  await $fetch(`/api/queries/${id}`, { method: "DELETE" });
-  await refreshSaved();
-}
+// A few bar heights for the product-frame chart mock (top referrers shape).
+const bars = [92, 64, 47, 38, 29, 22, 16, 11];
 </script>
 
 <template>
-  <div class="stack">
-    <div v-if="!connections || connections.length === 0" class="empty">
-      <span class="brand-mark empty-mark" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 14 14" fill="none">
-          <rect x="0.5" y="8" width="3" height="5.5" rx="1" fill="var(--accent)" />
-          <rect x="5.5" y="4" width="3" height="9.5" rx="1" fill="var(--accent)" />
-          <rect x="10.5" y="0.5" width="3" height="13" rx="1" fill="var(--accent)" />
-        </svg>
-      </span>
-      <p class="empty-title">Connect a Cloudflare account</p>
-      <p class="muted">Add a connection to run SQL against your Analytics Engine datasets.</p>
-      <button @click="navigateTo('/settings')">Add a connection</button>
-    </div>
-
-    <template v-else>
-      <div class="runner-head">
-        <label class="conn">
-          <span class="muted">Connection</span>
-          <select v-model="selectedConnectionId">
-            <option v-for="c in connections" :key="c.id" :value="c.id">{{ c.label }}</option>
-          </select>
-        </label>
-        <span class="spacer" />
-        <span v-if="selectedConnection?.defaultDataset" class="mono dataset-hint">
-          {{ selectedConnection.defaultDataset }}
-        </span>
-      </div>
-
-      <ClientOnly>
-        <SqlEditor v-model="sql" :placeholder="'SELECT ... FROM your_dataset'" @run="run" />
-        <template #fallback>
-          <textarea :value="sql" placeholder="SELECT ... FROM your_dataset" />
-        </template>
-      </ClientOnly>
-
-      <div class="actions">
-        <button :disabled="running" @click="run">{{ running ? "Running..." : "Run" }}</button>
-        <span class="kbd-hint" title="Run query"><kbd>Cmd</kbd><kbd>↵</kbd></span>
-        <button class="ghost" @click="sampleQuery">Sample query</button>
-        <span class="spacer" />
-        <input v-model="name" placeholder="Name this query..." class="save-input" />
-        <button class="ghost" @click="save">Save</button>
-      </div>
-
-      <div v-if="error || result" class="stack">
-        <pre v-if="error" class="error">{{ error }}</pre>
-        <template v-else-if="result">
-          <SegmentedControl
-            :model-value="view"
-            :options="[
-              { value: 'table', label: 'Table' },
-              { value: 'chart', label: 'Chart' },
-            ]"
-            aria-label="Result view"
-            @update:model-value="(v) => (view = v as 'table' | 'chart')"
-          />
-
-          <ResultsTable
-            v-if="view === 'table'"
-            :rows="result.rows"
-            :meta="result.meta"
-            :elapsed-ms="result.elapsedMs"
-          />
-
-          <div v-else class="stack">
-            <div class="row">
-              <label style="flex: 0 0 auto">
-                Type
-                <select v-model="chartType">
-                  <option value="line">line</option>
-                  <option value="area">area</option>
-                  <option value="bar">bar</option>
-                </select>
-              </label>
-              <label style="flex: 0 0 auto">
-                X axis
-                <select v-model="xColumn">
-                  <option v-for="c in resultColumns" :key="c" :value="c">{{ c }}</option>
-                </select>
-              </label>
-              <span class="muted">Series:</span>
-              <label
-                v-for="c in resultColumns.filter((col) => col !== xColumn)"
-                :key="c"
-                style="flex-direction: row; align-items: center; gap: 6px"
-              >
-                <input
-                  type="checkbox"
-                  style="width: auto"
-                  :checked="yColumns.includes(c)"
-                  @change="toggleY(c)"
-                />
-                {{ c }}
-              </label>
-            </div>
-            <ClientOnly>
-              <ChartView
-                :rows="result.rows"
-                :type="chartType"
-                :x-column="xColumn"
-                :y-columns="yColumns"
-              />
-            </ClientOnly>
-          </div>
-        </template>
-      </div>
-
-      <section class="saved card">
-        <h3 style="margin: 0">Saved queries</h3>
-        <p v-if="!saved || saved.length === 0" class="muted" style="margin: 0">
-          No saved queries yet. Run something and save it to reuse later.
+  <main class="landing">
+    <!-- Hero ----------------------------------------------------------------->
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Open source · Self-hosted</span>
+        <h1 class="hero-title">The dashboard Cloudflare Analytics Engine never shipped.</h1>
+        <p class="hero-sub">
+          Connect your Cloudflare account, write SQL against your Analytics Engine datasets, save
+          the queries you reuse, and build charts and dashboards. Runs entirely on your own
+          infrastructure.
         </p>
-        <ul v-else class="saved-list">
-          <li v-for="q in saved" :key="q.id" class="saved-item">
-            <button class="saved-name" @click="load(q)">{{ q.name }}</button>
-            <button class="ghost saved-del" @click="remove(q.id)">Delete</button>
-          </li>
-        </ul>
-      </section>
-    </template>
-  </div>
+        <div class="hero-cta">
+          <NuxtLink v-if="session" to="/query"><button>Open app</button></NuxtLink>
+          <NuxtLink v-else to="/signup"><button>Get started</button></NuxtLink>
+          <a :href="GITHUB_URL" target="_blank" rel="noopener"
+            ><button class="ghost">View on GitHub</button></a
+          >
+        </div>
+        <p class="hero-meta mono">MIT licensed · Deploys on Cloudflare or any Node host</p>
+      </div>
+
+      <!-- Bespoke product frame (not a screenshot) -->
+      <div class="frame" aria-hidden="true">
+        <div class="frame-bar">
+          <span class="frame-chip">production</span>
+          <span class="mono frame-path">pageviews</span>
+        </div>
+        <pre
+          class="frame-code"
+        ><span class="k">SELECT</span> blob2 <span class="k">AS</span> referrer,
+       <span class="fn">SUM</span>(_sample_interval) <span class="k">AS</span> views
+<span class="k">FROM</span> pageviews
+<span class="k">WHERE</span> timestamp &gt; <span class="mac">$SINCE</span>
+<span class="k">GROUP BY</span> referrer
+<span class="k">ORDER BY</span> views <span class="k">DESC</span></pre>
+        <div class="frame-chart">
+          <div v-for="(h, i) in bars" :key="i" class="frame-bar-col" :style="{ height: `${h}%` }" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Problem / positioning ----------------------------------------------->
+    <section class="band">
+      <p class="band-text">
+        Cloudflare Analytics Engine is a fast time-series store, but it ships no UI and no way to
+        save a query. EngineView is the missing layer on top.
+      </p>
+    </section>
+
+    <!-- Features ------------------------------------------------------------>
+    <section class="features">
+      <div class="feature feature-wide">
+        <div class="feature-copy">
+          <span class="eyebrow">Query</span>
+          <h2>Write SQL, get answers</h2>
+          <p>
+            A real editor with syntax highlighting and Cmd+Enter to run. Results land in a fast,
+            sortable table you can export to CSV, or flip to a chart in one click.
+          </p>
+        </div>
+        <div class="mini-editor mono">
+          <span
+            ><span class="k">SELECT</span> colo, <span class="fn">count</span>()
+            <span class="k">AS</span> n</span
+          >
+          <span><span class="k">FROM</span> requests</span>
+          <span
+            ><span class="k">GROUP BY</span> colo <span class="k">ORDER BY</span> n
+            <span class="k">DESC</span></span
+          >
+        </div>
+      </div>
+
+      <div class="feature">
+        <span class="eyebrow">Visualize</span>
+        <h2>Charts and dashboards</h2>
+        <p>
+          Turn any result into a line, area, or bar chart. Pin saved queries as panels on a
+          dashboard with a shared time range, driven by a simple <code>$SINCE</code> macro.
+        </p>
+        <div class="chart-mini">
+          <div v-for="(h, i) in bars.slice(0, 6)" :key="i" :style="{ height: `${h}%` }" />
+        </div>
+      </div>
+
+      <div class="feature">
+        <span class="eyebrow">Secure</span>
+        <h2>Bring your own Cloudflare</h2>
+        <p>
+          Each user connects their own account. API tokens are encrypted at rest with AES-256-GCM
+          and only ever decrypted on the server to run a query — never sent to the browser.
+        </p>
+        <div class="token-mock mono">
+          <span class="lock" aria-hidden="true">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+              <rect x="2.5" y="6" width="9" height="6.5" rx="1.5" stroke="var(--positive)" />
+              <path d="M4.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="var(--positive)" />
+            </svg>
+          </span>
+          cf_token ••••••••••••••••
+        </div>
+      </div>
+    </section>
+
+    <!-- Capability strip ---------------------------------------------------->
+    <section class="caps">
+      <span class="cap">Saved queries</span>
+      <span class="cap">CSV export</span>
+      <span class="cap">Multi-user accounts</span>
+      <span class="cap">Email verification</span>
+      <span class="cap">Shared time ranges</span>
+      <span class="cap">Postgres-backed</span>
+    </section>
+
+    <!-- Self-host ----------------------------------------------------------->
+    <section class="selfhost">
+      <div class="selfhost-copy">
+        <span class="eyebrow">Self-host</span>
+        <h2>Yours, end to end</h2>
+        <p>
+          No SaaS in the middle. Run it with Docker Compose or any Node host, point it at a Postgres
+          database, and you own every byte. It is open source under the MIT license.
+        </p>
+      </div>
+      <div class="terminal" aria-hidden="true">
+        <div class="term-bar"><span class="mono muted">bash</span></div>
+        <pre class="term-body"><span class="prompt">$</span> git clone engineview && cd engineview
+<span class="prompt">$</span> docker compose up --build
+<span class="cmt"># EngineView is live at http://localhost:3000</span></pre>
+      </div>
+    </section>
+
+    <!-- Final CTA ----------------------------------------------------------->
+    <section class="final">
+      <h2 class="final-title">Deploy it on your own account.</h2>
+      <div class="hero-cta">
+        <NuxtLink v-if="session" to="/query"><button>Open app</button></NuxtLink>
+        <NuxtLink v-else to="/signup"><button>Get started</button></NuxtLink>
+        <a :href="GITHUB_URL" target="_blank" rel="noopener"
+          ><button class="ghost">View on GitHub</button></a
+        >
+      </div>
+    </section>
+  </main>
 </template>
 
 <style scoped>
-.runner-head {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-}
-.conn {
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-sm);
-}
-.conn select {
-  width: auto;
-  min-width: 160px;
-}
-.dataset-hint {
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  background: var(--surface-1);
-  border: 1px solid var(--line-soft);
-  color: var(--text-3);
+.landing {
+  display: block;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 clamp(var(--space-lg), 5vw, var(--space-3xl));
 }
 
-.actions {
-  display: flex;
+/* Hero ----------------------------------------------------------------------*/
+.hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(var(--space-xl), 5vw, var(--space-3xl));
   align-items: center;
+  padding: clamp(var(--space-2xl), 7vw, 96px) 0 var(--space-3xl);
+  position: relative;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: -10% -40% 30% -10%;
+  z-index: -1;
+  background-image: radial-gradient(var(--line-soft) 1px, transparent 1px);
+  background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 30% 30%, #000 0%, transparent 70%);
+  mask-image: radial-gradient(ellipse 70% 60% at 30% 30%, #000 0%, transparent 70%);
+  opacity: 0.6;
+}
+.hero-copy {
+  display: grid;
+  gap: var(--space-md);
+  align-content: start;
+}
+.hero-title {
+  font-size: clamp(2.2rem, 5.2vw, 3.6rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  max-width: 14ch;
+  font-weight: 700;
+}
+.hero-sub {
+  font-size: var(--text-md);
+  color: var(--text-2);
+  line-height: 1.6;
+  max-width: 52ch;
+}
+.hero-cta {
+  display: flex;
   gap: var(--space-sm);
   flex-wrap: wrap;
+  margin-top: var(--space-2xs);
 }
-.save-input {
-  width: auto;
-  min-width: 200px;
+.hero-cta button {
+  padding: 10px 18px;
+  font-size: var(--text-base);
 }
-.kbd-hint {
-  display: inline-flex;
-  gap: 3px;
+.hero-meta {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  margin-top: var(--space-2xs);
 }
-kbd {
-  min-width: 20px;
-  height: 20px;
-  display: inline-grid;
-  place-items: center;
-  padding: 0 5px;
-  background: var(--surface-2);
+
+/* Product frame -------------------------------------------------------------*/
+.frame {
+  background: var(--surface-1);
   border: 1px solid var(--line);
-  border-radius: 5px;
-  font-size: 11px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  overflow: hidden;
+  transform: rotate(0.6deg);
+}
+.frame-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface-2);
+}
+.frame-chip {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  color: var(--accent);
+  background: var(--accent-quiet);
+}
+.frame-path {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+.frame-code {
+  margin: 0;
+  padding: var(--space-md) var(--space-lg);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--text-2);
+  white-space: pre;
+  overflow-x: auto;
+}
+.frame-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 96px;
+  padding: 0 var(--space-lg) var(--space-lg);
+}
+.frame-bar-col {
+  flex: 1;
+  background: var(--accent);
+  border-radius: 3px 3px 0 0;
+  opacity: 0.9;
+}
+.frame-bar-col:nth-child(2) {
+  background: #e3b341;
+}
+
+.k {
+  color: #7aa2ff;
+}
+.fn {
+  color: #43c4c0;
+}
+.mac {
+  color: #e3b341;
+  font-weight: 600;
+}
+
+/* Positioning band ----------------------------------------------------------*/
+.band {
+  padding: var(--space-2xl) 0;
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+}
+.band-text {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.6vw, 1.75rem);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+  max-width: 36ch;
+  color: var(--text);
+}
+
+/* Features ------------------------------------------------------------------*/
+.features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  padding: var(--space-2xl) 0;
+}
+.feature {
+  display: grid;
+  gap: var(--space-sm);
+  align-content: start;
+  padding: var(--space-xl);
+  background: var(--surface-1);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+}
+.feature h2 {
+  font-size: var(--text-lg);
+}
+.feature p {
+  color: var(--text-2);
+  line-height: 1.6;
+  max-width: 46ch;
+}
+.feature-wide {
+  grid-column: 1 / -1;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: var(--space-2xl);
+}
+.feature-copy {
+  display: grid;
+  gap: var(--space-sm);
+}
+.mini-editor {
+  display: grid;
+  gap: 4px;
+  padding: var(--space-lg);
+  background: var(--bg);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--text-2);
+}
+.chart-mini {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  height: 72px;
+  margin-top: var(--space-2xs);
+}
+.chart-mini > div {
+  flex: 1;
+  background: var(--accent);
+  border-radius: 3px 3px 0 0;
+  opacity: 0.85;
+}
+.chart-mini > div:nth-child(3) {
+  background: #43c4c0;
+}
+.token-mock {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-2xs);
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+.lock {
+  display: inline-flex;
+}
+
+/* Capability strip ----------------------------------------------------------*/
+.caps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  padding-bottom: var(--space-2xl);
+}
+.cap {
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  padding: 6px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+}
+
+/* Self-host -----------------------------------------------------------------*/
+.selfhost {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(var(--space-xl), 5vw, var(--space-2xl));
+  align-items: center;
+  padding: var(--space-2xl) 0;
+  border-top: 1px solid var(--line-soft);
+}
+.selfhost-copy {
+  display: grid;
+  gap: var(--space-sm);
+}
+.selfhost-copy h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  letter-spacing: -0.02em;
+}
+.selfhost-copy p {
+  color: var(--text-2);
+  line-height: 1.6;
+  max-width: 44ch;
+}
+.terminal {
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+}
+.term-bar {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface-2);
+}
+.term-body {
+  margin: 0;
+  padding: var(--space-lg);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.9;
+  color: var(--text);
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+.prompt {
+  color: var(--accent);
+  user-select: none;
+  margin-right: 8px;
+}
+.cmt {
   color: var(--text-3);
 }
 
-.empty {
+/* Final CTA -----------------------------------------------------------------*/
+.final {
   display: grid;
-  gap: var(--space-xs);
+  gap: var(--space-lg);
   place-items: center;
   text-align: center;
-  padding: var(--space-3xl) var(--space-lg);
-  border: 1px dashed var(--line);
-  border-radius: var(--radius-lg);
-}
-.empty-mark {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  margin-bottom: var(--space-xs);
-}
-.empty-title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--text-md);
-  margin: 0;
-}
-.empty button {
-  margin-top: var(--space-sm);
-}
-
-.saved {
-  gap: var(--space-md);
-  display: grid;
-}
-.saved-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-}
-.saved-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  padding: 10px 0;
+  padding: clamp(var(--space-2xl), 6vw, 88px) 0;
   border-top: 1px solid var(--line-soft);
 }
-.saved-item:first-child {
-  border-top: none;
+.final-title {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  letter-spacing: -0.025em;
+  max-width: 18ch;
 }
-.saved-name {
-  background: transparent;
-  color: var(--link);
-  border: 0;
-  padding: 0;
-  font-weight: 500;
-  text-align: left;
-}
-.saved-name:hover {
-  background: transparent;
-  text-decoration: underline;
-  transform: none;
-}
-.saved-del {
-  padding: 4px 10px;
-  font-size: var(--text-xs);
-  opacity: 0;
-  transition: opacity var(--dur-fast) var(--ease);
-}
-.saved-item:hover .saved-del,
-.saved-item:focus-within .saved-del {
-  opacity: 1;
+
+/* Responsive ----------------------------------------------------------------*/
+@media (max-width: 860px) {
+  .hero,
+  .features,
+  .feature-wide,
+  .selfhost {
+    grid-template-columns: 1fr;
+  }
+  .frame {
+    transform: none;
+  }
+  .selfhost {
+    gap: var(--space-xl);
+  }
 }
 </style>

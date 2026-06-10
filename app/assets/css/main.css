@@ -161,7 +161,7 @@ strong {
   border-bottom: 1px solid var(--line-soft);
 }
 
-.app-header .brand {
+.brand {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
@@ -171,7 +171,7 @@ strong {
   font-size: 1.0625rem;
   letter-spacing: -0.02em;
 }
-.app-header .brand:hover {
+.brand:hover {
   text-decoration: none;
 }
 

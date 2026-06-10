@@ -24,7 +24,7 @@ async function submit() {
     }
     return;
   }
-  const redirect = (route.query.redirect as string) || "/";
+  const redirect = (route.query.redirect as string) || "/query";
   await navigateTo(redirect);
 }
 

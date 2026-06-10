@@ -27,7 +27,9 @@ async function onSignOut() {
         EngineView
       </NuxtLink>
       <nav v-if="session">
-        <NuxtLink to="/" class="nav-link" :class="{ active: isActive('/') }">Query</NuxtLink>
+        <NuxtLink to="/query" class="nav-link" :class="{ active: isActive('/query') }"
+          >Query</NuxtLink
+        >
         <NuxtLink to="/dashboards" class="nav-link" :class="{ active: isActive('/dashboards') }">
           Dashboards
         </NuxtLink>

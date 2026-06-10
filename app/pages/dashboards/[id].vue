@@ -89,7 +89,7 @@ async function removeDashboard() {
 
     <div class="add-panel">
       <p v-if="!saved || saved.length === 0" class="muted" style="margin: 0">
-        Save a query first on the <NuxtLink to="/">Query</NuxtLink> page, then add it here.
+        Save a query first on the <NuxtLink to="/query">Query</NuxtLink> page, then add it here.
       </p>
       <form v-else class="add-panel-row" @submit.prevent="addPanel">
         <input v-model="addForm.title" placeholder="Panel title" />
