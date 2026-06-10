@@ -15,7 +15,7 @@ const bars = [92, 64, 47, 38, 29, 22, 16, 11];
 </script>
 
 <template>
-  <main class="landing">
+  <main id="main" tabindex="-1" class="landing">
     <!-- Hero ----------------------------------------------------------------->
     <section class="hero">
       <div class="hero-copy">

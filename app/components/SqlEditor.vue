@@ -36,6 +36,8 @@ const extensions = [
   sql(),
   oneDark,
   surface,
+  // Give the editable region an accessible name.
+  EditorView.contentAttributes.of({ "aria-label": "SQL query editor" }),
   // Wrap long lines instead of scrolling horizontally, so the editor never
   // forces the page wider than the viewport (important on phones).
   EditorView.lineWrapping,

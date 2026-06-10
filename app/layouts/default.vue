@@ -15,6 +15,7 @@ async function onSignOut() {
 
 <template>
   <div>
+    <a href="#main" class="skip-link">Skip to content</a>
     <header class="app-header">
       <NuxtLink to="/" class="brand" aria-label="EngineView home">
         <span class="brand-mark" aria-hidden="true">
@@ -40,7 +41,7 @@ async function onSignOut() {
         <button class="ghost" @click="onSignOut">Sign out</button>
       </nav>
     </header>
-    <main>
+    <main id="main" tabindex="-1">
       <slot />
     </main>
   </div>

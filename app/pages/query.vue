@@ -52,6 +52,8 @@ const result = ref<QueryResult | null>(null);
 const running = ref(false);
 const saving = ref(false);
 const error = ref("");
+// Concise message announced to screen readers when a run finishes (WCAG 4.1.3).
+const status = ref("");
 
 const view = ref<"table" | "chart">("table");
 const chartType = ref<ChartType>("line");
@@ -100,19 +102,23 @@ async function run() {
   running.value = true;
   error.value = "";
   result.value = null;
+  status.value = "Running query…";
   const started = performance.now();
   try {
     const body = await $fetch<{ data?: Record<string, unknown>[]; meta?: ColumnMeta[] }>(
       "/api/query",
       { method: "POST", body: { connectionId: selectedConnectionId.value, sql: sql.value } },
     );
+    const rows = body.data ?? [];
     result.value = {
-      rows: body.data ?? [],
+      rows,
       meta: body.meta ?? [],
       elapsedMs: Math.round(performance.now() - started),
     };
+    status.value = `Returned ${rows.length} row${rows.length === 1 ? "" : "s"} in ${result.value.elapsedMs} ms.`;
   } catch (e) {
     error.value = extractApiError(e);
+    status.value = "";
   } finally {
     running.value = false;
   }
@@ -199,8 +205,10 @@ async function remove(id: string) {
         <button class="ghost" :disabled="saving" @click="save">Save</button>
       </div>
 
+      <p class="sr-only" role="status" aria-live="polite">{{ status }}</p>
+
       <div v-if="error || result" class="stack">
-        <pre v-if="error" class="error">{{ error }}</pre>
+        <pre v-if="error" class="error" role="alert">{{ error }}</pre>
         <template v-else-if="result">
           <SegmentedControl
             :model-value="view"

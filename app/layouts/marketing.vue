@@ -7,6 +7,7 @@ const { data: session } = await authClient.useSession(useFetch);
 
 <template>
   <div class="marketing">
+    <a href="#main" class="skip-link">Skip to content</a>
     <header class="m-header">
       <NuxtLink to="/" class="brand" aria-label="EngineView home">
         <span class="brand-mark" aria-hidden="true">

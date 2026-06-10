@@ -152,6 +152,32 @@ h3 {
   border: 0;
 }
 
+/* Keyboard users can jump past the header nav to the page content. Hidden until
+   focused. */
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: var(--space-md);
+  z-index: 100;
+  padding: 8px 14px;
+  background: var(--surface-3);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  transition: top var(--dur-fast) var(--ease);
+}
+.skip-link:focus {
+  top: var(--space-sm);
+  text-decoration: none;
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-quiet);
+}
+main:focus {
+  outline: none;
+}
+
 p {
   margin: 0;
 }

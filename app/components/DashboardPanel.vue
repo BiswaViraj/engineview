@@ -87,7 +87,10 @@ async function toggleWidth() {
       </div>
     </header>
     <p v-if="loading" class="muted panel-status">Loading...</p>
-    <pre v-else-if="error" class="error">{{ error }}</pre>
+    <div v-else-if="error" class="panel-error" role="alert">
+      <pre class="error">{{ error }}</pre>
+      <button v-if="panel.connectionId" class="ghost" @click="load">Retry</button>
+    </div>
     <ClientOnly v-else>
       <ChartView
         :rows="rows"
@@ -144,5 +147,10 @@ async function toggleWidth() {
   min-height: 80px;
   display: grid;
   place-items: center;
+}
+.panel-error {
+  display: grid;
+  gap: var(--space-sm);
+  justify-items: start;
 }
 </style>
