@@ -28,6 +28,10 @@ const { data, error, refresh } = await useFetch<DashboardData>(`/api/dashboards/
 const { data: saved } = await useFetch<SavedQuery[]>("/api/queries", { default: () => [] });
 
 const RANGES = ["1 HOUR", "24 HOUR", "7 DAY", "30 DAY"];
+const rangeOptions = RANGES.map((r) => ({
+  value: r,
+  label: r.replace(" HOUR", "h").replace(" DAY", "d"),
+}));
 const timeRange = ref(data.value?.dashboard.timeRange ?? "24 HOUR");
 
 async function setRange(r: string) {
@@ -68,39 +72,41 @@ async function removeDashboard() {
     </p>
   </div>
   <div v-else-if="data" class="stack">
-    <div class="row">
-      <h2 style="margin: 0">{{ data.dashboard.name }}</h2>
+    <div class="dash-head">
+      <div class="stack" style="gap: 2px">
+        <span class="eyebrow">Dashboard</span>
+        <h2 style="margin: 0">{{ data.dashboard.name }}</h2>
+      </div>
       <span class="spacer" />
-      <label style="flex-direction: row; align-items: center; gap: 6px">
-        <span class="muted">Time range</span>
-        <select :value="timeRange" @change="setRange(($event.target as HTMLSelectElement).value)">
-          <option v-for="r in RANGES" :key="r" :value="r">last {{ r.toLowerCase() }}</option>
-        </select>
-      </label>
-      <button class="ghost" @click="removeDashboard">Delete dashboard</button>
+      <SegmentedControl
+        :model-value="timeRange"
+        :options="rangeOptions"
+        aria-label="Time range"
+        @update:model-value="setRange"
+      />
+      <button class="danger" @click="removeDashboard">Delete</button>
     </div>
 
-    <div class="card stack">
-      <h3 style="margin: 0">Add a panel</h3>
+    <div class="add-panel">
       <p v-if="!saved || saved.length === 0" class="muted" style="margin: 0">
         Save a query first on the <NuxtLink to="/">Query</NuxtLink> page, then add it here.
       </p>
-      <div v-else class="row">
-        <input v-model="addForm.title" placeholder="Panel title" style="width: auto" />
-        <select v-model="addForm.queryId">
+      <form v-else class="add-panel-row" @submit.prevent="addPanel">
+        <input v-model="addForm.title" placeholder="Panel title" />
+        <select v-model="addForm.queryId" aria-label="Saved query">
           <option value="" disabled>Choose a saved query</option>
           <option v-for="q in saved" :key="q.id" :value="q.id">{{ q.name }}</option>
         </select>
-        <select v-model="addForm.chartType">
-          <option value="line">line</option>
-          <option value="area">area</option>
-          <option value="bar">bar</option>
+        <select v-model="addForm.chartType" aria-label="Chart type">
+          <option value="line">Line</option>
+          <option value="area">Area</option>
+          <option value="bar">Bar</option>
         </select>
-        <button :disabled="adding" @click="addPanel">Add panel</button>
-      </div>
-      <p class="muted" style="margin: 0">
-        Tip: use the <code>$SINCE</code> token in a query (e.g. <code>timestamp &gt; $SINCE</code>)
-        and it expands to the dashboard's time range.
+        <button type="submit" :disabled="adding">Add panel</button>
+      </form>
+      <p class="muted add-panel-tip">
+        Use <code>$SINCE</code> in a query (e.g. <code>timestamp &gt; $SINCE</code>) to follow the
+        dashboard's time range.
       </p>
     </div>
 
@@ -114,14 +120,65 @@ async function removeDashboard() {
         @updated="refresh"
       />
     </div>
-    <p v-else class="muted">No panels yet. Add one above.</p>
+    <div v-else class="empty">
+      <p class="empty-title">No panels yet</p>
+      <p class="muted">Add a saved query above to chart it here. Panels share the time range.</p>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.dash-head {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.add-panel {
+  display: grid;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background: var(--surface-1);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+}
+.add-panel-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(220px, 2fr) auto auto;
+  gap: var(--space-sm);
+  align-items: center;
+}
+.add-panel-tip {
+  margin: 0;
+  font-size: var(--text-xs);
+}
+
 .panel-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
+  gap: var(--space-md);
+}
+
+.empty {
+  display: grid;
+  gap: var(--space-2xs);
+  place-items: center;
+  text-align: center;
+  padding: var(--space-3xl) var(--space-lg);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-lg);
+}
+.empty-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-md);
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .add-panel-row {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

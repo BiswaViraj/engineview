@@ -37,7 +37,18 @@ const props = withDefaults(
   { type: "line", height: 360 },
 );
 
-const PALETTE = ["#1f6feb", "#3fb950", "#db61a2", "#e3b341", "#a371f7", "#f0883e"];
+// Distinguishable by lightness as well as hue, so series stay readable without
+// relying on color alone.
+const PALETTE = ["#4d8dff", "#e3b341", "#43c4c0", "#d678c2", "#66cf83", "#e58b4a"];
+
+// Match the UI surfaces so charts feel native rather than dropped in.
+const TICK = "#7f8a9e";
+const GRID = "rgba(120, 134, 158, 0.12)";
+const LABEL = "#aab3c4";
+const GRID_FONT = {
+  family: "'JetBrains Mono', ui-monospace, monospace",
+  size: 10,
+};
 
 const chartData = computed(() => {
   const series = buildChartData(props.rows, props.xColumn, props.yColumns);
@@ -49,10 +60,15 @@ const chartData = computed(() => {
         label: d.label,
         data: d.data,
         borderColor: color,
-        backgroundColor: props.type === "area" ? `${color}33` : color,
+        backgroundColor: props.type === "area" ? `${color}26` : color,
         fill: props.type === "area",
-        tension: 0.2,
-        pointRadius: 2,
+        borderWidth: 2,
+        tension: 0.28,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointBackgroundColor: color,
+        borderRadius: props.type === "bar" ? 3 : 0,
+        maxBarThickness: 26,
       };
     }),
   };
@@ -61,10 +77,37 @@ const chartData = computed(() => {
 const options = {
   responsive: true,
   maintainAspectRatio: false,
-  plugins: { legend: { labels: { color: "#e6edf3" } } },
+  interaction: { mode: "index" as const, intersect: false },
+  plugins: {
+    legend: {
+      align: "end" as const,
+      labels: {
+        color: LABEL,
+        boxWidth: 8,
+        boxHeight: 8,
+        usePointStyle: true,
+        pointStyle: "circle",
+        font: { family: "'Hanken Grotesk', sans-serif", size: 12 },
+      },
+    },
+    tooltip: {
+      backgroundColor: "#11161f",
+      borderColor: "rgba(120, 134, 158, 0.25)",
+      borderWidth: 1,
+      titleColor: LABEL,
+      bodyColor: "#eef1f6",
+      padding: 10,
+      cornerRadius: 8,
+      titleFont: GRID_FONT,
+    },
+  },
   scales: {
-    x: { ticks: { color: "#8b949e" }, grid: { color: "#1c2530" } },
-    y: { ticks: { color: "#8b949e" }, grid: { color: "#1c2530" } },
+    x: { ticks: { color: TICK, font: GRID_FONT }, grid: { color: GRID, drawTicks: false } },
+    y: {
+      ticks: { color: TICK, font: GRID_FONT, maxTicksLimit: 6 },
+      grid: { color: GRID, drawTicks: false },
+      border: { display: false },
+    },
   },
 };
 </script>

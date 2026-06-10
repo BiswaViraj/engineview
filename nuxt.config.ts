@@ -2,8 +2,19 @@
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
-  modules: ["@nuxt/eslint"],
+  modules: ["@nuxt/eslint", "@nuxt/fonts"],
   css: ["~/assets/css/main.css"],
+
+  // Self-hosted at build time, no runtime CDN. Archivo (display) is grotesque
+  // and mechanical; Hanken Grotesk (body) is a humanist counterpoint; JetBrains
+  // Mono carries SQL and data.
+  fonts: {
+    families: [
+      { name: "Archivo", provider: "google", weights: [500, 600, 700] },
+      { name: "Hanken Grotesk", provider: "google", weights: [400, 500, 600, 700] },
+      { name: "JetBrains Mono", provider: "google", weights: [400, 500, 600] },
+    ],
+  },
 
   // Security headers applied to every response. A strict Content-Security-Policy
   // is intentionally left out: it needs per-deploy nonces to allow Nuxt's inline

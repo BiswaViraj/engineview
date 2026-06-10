@@ -79,10 +79,13 @@ async function remove(id: string) {
 
 <template>
   <div class="stack">
-    <h2 style="margin: 0">Cloudflare connections</h2>
-    <p class="muted">
-      Connect a Cloudflare account so you can query its Analytics Engine datasets. The API token is
-      encrypted before it is stored and is never shown again. Create one in the Cloudflare dashboard
+    <div class="stack" style="gap: 4px">
+      <span class="eyebrow">Connections</span>
+      <h2 style="margin: 0">Cloudflare accounts</h2>
+    </div>
+    <p class="lead">
+      Connect a Cloudflare account to query its Analytics Engine datasets. The API token is
+      encrypted before it is stored and never shown again. Create one in the Cloudflare dashboard
       with the "Account Analytics: Read" permission.
     </p>
 
@@ -135,7 +138,7 @@ async function remove(id: string) {
         <tbody>
           <tr v-for="c in connections" :key="c.id">
             <td>{{ c.label }}</td>
-            <td>{{ c.accountId }}</td>
+            <td class="mono">{{ c.accountId }}</td>
             <td>{{ c.defaultDataset || "none" }}</td>
             <td class="row" style="border: 0; justify-content: flex-end">
               <button class="ghost" @click="edit(c)">Edit</button>

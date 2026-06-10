@@ -41,10 +41,14 @@ function download() {
 <template>
   <p v-if="rows.length === 0" class="muted">No rows. The query ran in {{ elapsedMs }} ms.</p>
   <div v-else class="stack">
-    <div class="row">
-      <span class="muted">
-        {{ rows.length }} row{{ rows.length === 1 ? "" : "s" }} in {{ elapsedMs }} ms
-      </span>
+    <div class="result-bar">
+      <span class="stat"
+        ><b>{{ rows.length }}</b> row{{ rows.length === 1 ? "" : "s" }}</span
+      >
+      <span class="dot">·</span>
+      <span class="stat"
+        ><b>{{ elapsedMs }}</b> ms</span
+      >
       <span class="spacer" />
       <button class="ghost" @click="download">Download CSV</button>
     </div>
@@ -68,11 +72,28 @@ function download() {
 </template>
 
 <style scoped>
+.result-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.stat {
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+.stat b {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--text);
+}
+.dot {
+  color: var(--text-3);
+}
 .table-scroll {
   overflow: auto;
-  max-height: 60vh;
-  border: 1px solid #1c2530;
-  border-radius: 8px;
+  max-height: 62vh;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
 }
 .table-scroll table {
   border: 0;
@@ -81,9 +102,5 @@ function download() {
   position: sticky;
   top: 0;
   z-index: 1;
-}
-td.num {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
 }
 </style>

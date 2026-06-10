@@ -143,21 +143,31 @@ async function remove(id: string) {
 
 <template>
   <div class="stack">
-    <div v-if="!connections || connections.length === 0" class="card">
-      <p class="muted" style="margin: 0">
-        Add a Cloudflare connection under
-        <NuxtLink to="/settings">Connections</NuxtLink> to start running queries.
-      </p>
+    <div v-if="!connections || connections.length === 0" class="empty">
+      <span class="brand-mark empty-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 14 14" fill="none">
+          <rect x="0.5" y="8" width="3" height="5.5" rx="1" fill="var(--accent)" />
+          <rect x="5.5" y="4" width="3" height="9.5" rx="1" fill="var(--accent)" />
+          <rect x="10.5" y="0.5" width="3" height="13" rx="1" fill="var(--accent)" />
+        </svg>
+      </span>
+      <p class="empty-title">Connect a Cloudflare account</p>
+      <p class="muted">Add a connection to run SQL against your Analytics Engine datasets.</p>
+      <button @click="navigateTo('/settings')">Add a connection</button>
     </div>
 
     <template v-else>
-      <div class="row">
-        <label style="flex: 0 0 auto">
-          Connection
+      <div class="runner-head">
+        <label class="conn">
+          <span class="muted">Connection</span>
           <select v-model="selectedConnectionId">
             <option v-for="c in connections" :key="c.id" :value="c.id">{{ c.label }}</option>
           </select>
         </label>
+        <span class="spacer" />
+        <span v-if="selectedConnection?.defaultDataset" class="mono dataset-hint">
+          {{ selectedConnection.defaultDataset }}
+        </span>
       </div>
 
       <ClientOnly>
@@ -167,22 +177,27 @@ async function remove(id: string) {
         </template>
       </ClientOnly>
 
-      <div class="row">
+      <div class="actions">
         <button :disabled="running" @click="run">{{ running ? "Running..." : "Run" }}</button>
-        <span class="muted">or press Cmd/Ctrl + Enter</span>
+        <span class="kbd-hint" title="Run query"><kbd>Cmd</kbd><kbd>↵</kbd></span>
         <button class="ghost" @click="sampleQuery">Sample query</button>
         <span class="spacer" />
-        <input v-model="name" placeholder="Save as..." style="width: auto" />
-        <button class="ghost" @click="save">Save query</button>
+        <input v-model="name" placeholder="Name this query..." class="save-input" />
+        <button class="ghost" @click="save">Save</button>
       </div>
 
       <div v-if="error || result" class="stack">
         <pre v-if="error" class="error">{{ error }}</pre>
         <template v-else-if="result">
-          <div class="row">
-            <button :class="{ ghost: view !== 'table' }" @click="view = 'table'">Table</button>
-            <button :class="{ ghost: view !== 'chart' }" @click="view = 'chart'">Chart</button>
-          </div>
+          <SegmentedControl
+            :model-value="view"
+            :options="[
+              { value: 'table', label: 'Table' },
+              { value: 'chart', label: 'Chart' },
+            ]"
+            aria-label="Result view"
+            @update:model-value="(v) => (view = v as 'table' | 'chart')"
+          />
 
           <ResultsTable
             v-if="view === 'table'"
@@ -234,14 +249,139 @@ async function remove(id: string) {
         </template>
       </div>
 
-      <div class="card stack">
+      <section class="saved card">
         <h3 style="margin: 0">Saved queries</h3>
-        <p v-if="!saved || saved.length === 0" class="muted">None yet.</p>
-        <div v-for="q in saved" v-else :key="q.id" class="row">
-          <a style="cursor: pointer" @click="load(q)">{{ q.name }}</a>
-          <button class="ghost" @click="remove(q.id)">delete</button>
-        </div>
-      </div>
+        <p v-if="!saved || saved.length === 0" class="muted" style="margin: 0">
+          No saved queries yet. Run something and save it to reuse later.
+        </p>
+        <ul v-else class="saved-list">
+          <li v-for="q in saved" :key="q.id" class="saved-item">
+            <button class="saved-name" @click="load(q)">{{ q.name }}</button>
+            <button class="ghost saved-del" @click="remove(q.id)">Delete</button>
+          </li>
+        </ul>
+      </section>
     </template>
   </div>
 </template>
+
+<style scoped>
+.runner-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+.conn {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.conn select {
+  width: auto;
+  min-width: 160px;
+}
+.dataset-hint {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--line-soft);
+  color: var(--text-3);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.save-input {
+  width: auto;
+  min-width: 200px;
+}
+.kbd-hint {
+  display: inline-flex;
+  gap: 3px;
+}
+kbd {
+  min-width: 20px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.empty {
+  display: grid;
+  gap: var(--space-xs);
+  place-items: center;
+  text-align: center;
+  padding: var(--space-3xl) var(--space-lg);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-lg);
+}
+.empty-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  margin-bottom: var(--space-xs);
+}
+.empty-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-md);
+  margin: 0;
+}
+.empty button {
+  margin-top: var(--space-sm);
+}
+
+.saved {
+  gap: var(--space-md);
+  display: grid;
+}
+.saved-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.saved-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 10px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.saved-item:first-child {
+  border-top: none;
+}
+.saved-name {
+  background: transparent;
+  color: var(--link);
+  border: 0;
+  padding: 0;
+  font-weight: 500;
+  text-align: left;
+}
+.saved-name:hover {
+  background: transparent;
+  text-decoration: underline;
+  transform: none;
+}
+.saved-del {
+  padding: 4px 10px;
+  font-size: var(--text-xs);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.saved-item:hover .saved-del,
+.saved-item:focus-within .saved-del {
+  opacity: 1;
+}
+</style>

@@ -78,14 +78,15 @@ async function toggleWidth() {
 </script>
 
 <template>
-  <div class="card stack" :style="{ gridColumn: `span ${panel.posW}` }">
-    <div class="row">
-      <strong>{{ panel.title }}</strong>
-      <span class="spacer" />
-      <button class="ghost" @click="toggleWidth">{{ panel.posW >= 12 ? "half" : "full" }}</button>
-      <button class="ghost" @click="remove">remove</button>
-    </div>
-    <p v-if="loading" class="muted">Loading...</p>
+  <section class="panel card" :style="{ gridColumn: `span ${panel.posW}` }">
+    <header class="panel-head">
+      <h3 class="panel-title">{{ panel.title }}</h3>
+      <div class="panel-actions">
+        <button class="ghost" @click="toggleWidth">{{ panel.posW >= 12 ? "Half" : "Full" }}</button>
+        <button class="ghost" @click="remove">Remove</button>
+      </div>
+    </header>
+    <p v-if="loading" class="muted panel-status">Loading...</p>
     <pre v-else-if="error" class="error">{{ error }}</pre>
     <ClientOnly v-else>
       <ChartView
@@ -96,5 +97,44 @@ async function toggleWidth() {
         :height="panel.posH * 28"
       />
     </ClientOnly>
-  </div>
+  </section>
 </template>
+
+<style scoped>
+.panel {
+  display: grid;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  min-height: 28px;
+}
+.panel-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.panel-actions {
+  display: flex;
+  gap: var(--space-2xs);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.panel:hover .panel-actions,
+.panel:focus-within .panel-actions {
+  opacity: 1;
+}
+.panel-actions button {
+  padding: 4px 10px;
+  font-size: var(--text-xs);
+}
+.panel-status {
+  min-height: 80px;
+  display: grid;
+  place-items: center;
+}
+</style>
