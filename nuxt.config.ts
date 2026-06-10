@@ -5,6 +5,24 @@ export default defineNuxtConfig({
   modules: ["@nuxt/eslint", "@nuxt/fonts"],
   css: ["~/assets/css/main.css"],
 
+  app: {
+    head: {
+      title: "EngineView",
+      link: [
+        { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+        { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+        { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      ],
+      meta: [
+        {
+          name: "description",
+          content:
+            "Run SQL against your Cloudflare Analytics Engine datasets, save queries, and build dashboards.",
+        },
+      ],
+    },
+  },
+
   // Self-hosted at build time, no runtime CDN. Archivo (display) is grotesque
   // and mechanical; Hanken Grotesk (body) is a humanist counterpoint; JetBrains
   // Mono carries SQL and data.
