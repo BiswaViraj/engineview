@@ -64,6 +64,7 @@ const GRID = token("--chart-grid", "rgba(120, 134, 158, 0.12)");
 const LABEL = token("--chart-label", "#aab3c4");
 const TOOLTIP_BG = token("--chart-tooltip-bg", "#11161f");
 const TOOLTIP_FG = token("--chart-tooltip-fg", "#eef1f6");
+const TOOLTIP_BORDER = token("--chart-tooltip-border", "rgba(120, 134, 158, 0.25)");
 const GRID_FONT = {
   family: "'JetBrains Mono', ui-monospace, monospace",
   size: 10,
@@ -111,7 +112,7 @@ const options = {
     },
     tooltip: {
       backgroundColor: TOOLTIP_BG,
-      borderColor: "rgba(120, 134, 158, 0.25)",
+      borderColor: TOOLTIP_BORDER,
       borderWidth: 1,
       titleColor: LABEL,
       bodyColor: TOOLTIP_FG,

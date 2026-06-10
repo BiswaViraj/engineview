@@ -29,19 +29,19 @@ async function submit() {
 <template>
   <div class="auth-wrap card stack">
     <template v-if="invalid">
-      <h1 style="margin: 0">Link expired</h1>
+      <h1>Link expired</h1>
       <p class="muted">This password reset link is invalid or has expired.</p>
       <NuxtLink to="/forgot-password">Request a new one</NuxtLink>
     </template>
 
     <template v-else-if="done">
-      <h1 style="margin: 0">Password updated</h1>
+      <h1>Password updated</h1>
       <p class="muted">Your password has been changed.</p>
       <NuxtLink to="/login">Sign in</NuxtLink>
     </template>
 
     <template v-else>
-      <h1 style="margin: 0">Choose a new password</h1>
+      <h1>Choose a new password</h1>
       <form class="stack" @submit.prevent="submit">
         <label>
           New password

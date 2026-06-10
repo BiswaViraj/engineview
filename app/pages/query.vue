@@ -271,8 +271,8 @@ async function remove(id: string) {
       </div>
 
       <section class="saved card">
-        <h3 style="margin: 0">Saved queries</h3>
-        <p v-if="!saved || saved.length === 0" class="muted" style="margin: 0">
+        <h3>Saved queries</h3>
+        <p v-if="!saved || saved.length === 0" class="muted">
           No saved queries yet. Run something and save it to reuse later.
         </p>
         <ul v-else class="saved-list">

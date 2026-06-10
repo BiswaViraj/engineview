@@ -23,12 +23,15 @@ const adding = ref(false);
 const createForm = reactive(blank());
 const createError = ref("");
 const createBusy = ref(false);
+const createLabelInput = ref<HTMLInputElement | null>(null);
 
-function openAdd() {
+async function openAdd() {
   Object.assign(createForm, blank());
   createError.value = "";
   editingId.value = null;
   adding.value = true;
+  await nextTick();
+  createLabelInput.value?.focus();
 }
 function cancelAdd() {
   adding.value = false;
@@ -54,7 +57,7 @@ const editForm = reactive(blank());
 const editError = ref("");
 const editBusy = ref(false);
 
-function openEdit(c: Connection) {
+async function openEdit(c: Connection) {
   editingId.value = c.id;
   editForm.label = c.label;
   editForm.accountId = c.accountId;
@@ -62,6 +65,9 @@ function openEdit(c: Connection) {
   editForm.defaultDataset = c.defaultDataset ?? "";
   editError.value = "";
   adding.value = false;
+  await nextTick();
+  // The edit form lives inside a v-for, so query the single open one directly.
+  document.querySelector<HTMLInputElement>(".edit-form input")?.focus();
 }
 function cancelEdit() {
   editingId.value = null;
@@ -99,7 +105,7 @@ async function remove(id: string) {
 <template>
   <div class="stack">
     <div class="head">
-      <div class="stack" style="gap: 4px">
+      <div class="stack" style="gap: var(--space-2xs)">
         <span class="eyebrow">Connections</span>
         <h1>Cloudflare accounts</h1>
       </div>
@@ -118,7 +124,12 @@ async function remove(id: string) {
       <form class="stack" @submit.prevent="create">
         <label>
           Label
-          <input v-model="createForm.label" required placeholder="Production account" />
+          <input
+            ref="createLabelInput"
+            v-model="createForm.label"
+            required
+            placeholder="Production account"
+          />
         </label>
         <label>
           Cloudflare account id

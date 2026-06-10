@@ -30,7 +30,7 @@ async function create() {
 
 <template>
   <div class="stack">
-    <h1 style="margin: 0">Dashboards</h1>
+    <h1>Dashboards</h1>
     <div class="card">
       <div class="create-row">
         <input

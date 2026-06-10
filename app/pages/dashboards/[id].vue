@@ -67,7 +67,7 @@ async function removeDashboard() {
 
 <template>
   <div v-if="error" class="card">
-    <p class="muted" style="margin: 0">
+    <p class="muted">
       Dashboard not found. <NuxtLink to="/dashboards">Back to dashboards</NuxtLink>
     </p>
   </div>
@@ -88,7 +88,7 @@ async function removeDashboard() {
     </div>
 
     <div class="add-panel">
-      <p v-if="!saved || saved.length === 0" class="muted" style="margin: 0">
+      <p v-if="!saved || saved.length === 0" class="muted">
         Save a query first on the <NuxtLink to="/query">Query</NuxtLink> page, then add it here.
       </p>
       <form v-else class="add-panel-row" @submit.prevent="addPanel">
@@ -141,7 +141,7 @@ async function removeDashboard() {
 }
 .dash-title {
   display: grid;
-  gap: 2px;
+  gap: var(--space-2xs);
   min-width: 0;
 }
 .dash-title h1 {

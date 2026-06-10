@@ -56,6 +56,7 @@
   --chart-grid: rgba(120, 134, 158, 0.12);
   --chart-tooltip-bg: #11161f;
   --chart-tooltip-fg: #eef1f6;
+  --chart-tooltip-border: rgba(120, 134, 158, 0.25);
   --syntax-keyword: #7aa2ff;
   --syntax-fn: #43c4c0;
   --syntax-macro: #e3b341;
