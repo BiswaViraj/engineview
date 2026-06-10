@@ -98,6 +98,12 @@ function download() {
 .table-scroll table {
   border: 0;
 }
+/* Cap very long cell values so one giant blob wraps instead of forcing a
+   thousand-pixel-wide column. */
+.table-scroll td {
+  max-width: 440px;
+  overflow-wrap: anywhere;
+}
 .table-scroll th {
   position: sticky;
   top: 0;

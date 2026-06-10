@@ -73,9 +73,9 @@ async function removeDashboard() {
   </div>
   <div v-else-if="data" class="stack">
     <div class="dash-head">
-      <div class="stack" style="gap: 2px">
+      <div class="dash-title">
         <span class="eyebrow">Dashboard</span>
-        <h1 style="margin: 0">{{ data.dashboard.name }}</h1>
+        <h1>{{ data.dashboard.name }}</h1>
       </div>
       <span class="spacer" />
       <SegmentedControl
@@ -92,7 +92,12 @@ async function removeDashboard() {
         Save a query first on the <NuxtLink to="/query">Query</NuxtLink> page, then add it here.
       </p>
       <form v-else class="add-panel-row" @submit.prevent="addPanel">
-        <input v-model="addForm.title" placeholder="Panel title" />
+        <input
+          v-model="addForm.title"
+          placeholder="Panel title"
+          aria-label="Panel title"
+          maxlength="80"
+        />
         <select v-model="addForm.queryId" aria-label="Saved query">
           <option value="" disabled>Choose a saved query</option>
           <option v-for="q in saved" :key="q.id" :value="q.id">{{ q.name }}</option>
@@ -133,6 +138,15 @@ async function removeDashboard() {
   align-items: flex-end;
   gap: var(--space-md);
   flex-wrap: wrap;
+}
+.dash-title {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.dash-title h1 {
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .add-panel {

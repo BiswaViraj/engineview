@@ -105,6 +105,7 @@ async function toggleWidth() {
   display: grid;
   gap: var(--space-md);
   padding: var(--space-md) var(--space-lg) var(--space-lg);
+  min-width: 0;
 }
 .panel-head {
   display: flex;
@@ -112,14 +113,21 @@ async function toggleWidth() {
   justify-content: space-between;
   gap: var(--space-sm);
   min-height: 28px;
+  min-width: 0;
 }
 .panel-title {
+  min-width: 0;
+  flex: 1;
   font-size: var(--text-base);
   font-weight: 600;
   letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .panel-actions {
   display: flex;
+  flex-shrink: 0;
   gap: var(--space-2xs);
   opacity: 0;
   transition: opacity var(--dur-fast) var(--ease);

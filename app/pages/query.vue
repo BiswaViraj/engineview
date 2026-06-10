@@ -50,6 +50,7 @@ const sql = ref("");
 const name = ref("");
 const result = ref<QueryResult | null>(null);
 const running = ref(false);
+const saving = ref(false);
 const error = ref("");
 
 const view = ref<"table" | "chart">("table");
@@ -119,13 +120,18 @@ async function run() {
 
 async function save() {
   const trimmed = name.value.trim();
-  if (!trimmed || !sql.value.trim()) return;
-  await $fetch("/api/queries", {
-    method: "POST",
-    body: { name: trimmed, sql: sql.value, connectionId: selectedConnectionId.value || null },
-  });
-  name.value = "";
-  await refreshSaved();
+  if (!trimmed || !sql.value.trim() || saving.value) return;
+  saving.value = true;
+  try {
+    await $fetch("/api/queries", {
+      method: "POST",
+      body: { name: trimmed, sql: sql.value, connectionId: selectedConnectionId.value || null },
+    });
+    name.value = "";
+    await refreshSaved();
+  } finally {
+    saving.value = false;
+  }
 }
 
 function load(q: SavedQuery) {
@@ -183,8 +189,14 @@ async function remove(id: string) {
         <span class="kbd-hint" title="Run query"><kbd>Cmd</kbd><kbd>↵</kbd></span>
         <button class="ghost" @click="sampleQuery">Sample query</button>
         <span class="spacer" />
-        <input v-model="name" placeholder="Name this query..." class="save-input" />
-        <button class="ghost" @click="save">Save</button>
+        <input
+          v-model="name"
+          placeholder="Name this query..."
+          class="save-input"
+          aria-label="Name this query"
+          @keyup.enter="save"
+        />
+        <button class="ghost" :disabled="saving" @click="save">Save</button>
       </div>
 
       <div v-if="error || result" class="stack">
@@ -280,6 +292,7 @@ async function remove(id: string) {
 .conn select {
   width: auto;
   min-width: 160px;
+  max-width: 260px;
 }
 .dataset-hint {
   padding: 4px 10px;
@@ -363,12 +376,18 @@ kbd {
   border-top: none;
 }
 .saved-name {
+  min-width: 0;
+  flex: 1;
   background: transparent;
   color: var(--link);
   border: 0;
   padding: 0;
   font-weight: 500;
   text-align: left;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .saved-name:hover {
   background: transparent;
@@ -376,6 +395,7 @@ kbd {
   transform: none;
 }
 .saved-del {
+  flex-shrink: 0;
   padding: 4px 10px;
   font-size: var(--text-xs);
   opacity: 0;

@@ -129,10 +129,18 @@ const options = {
     },
   },
 };
+
+// A text alternative for the canvas, so the chart is not opaque to assistive tech.
+const summary = computed(() => {
+  if (props.rows.length === 0 || !props.xColumn || props.yColumns.length === 0) {
+    return "Chart with no data";
+  }
+  return `${props.type} chart of ${props.yColumns.join(", ")} by ${props.xColumn}, ${props.rows.length} points`;
+});
 </script>
 
 <template>
-  <div :style="{ height: `${height}px` }">
+  <div :style="{ height: `${height}px` }" role="img" :aria-label="summary">
     <p v-if="rows.length === 0 || !xColumn || yColumns.length === 0" class="muted">
       Nothing to chart yet.
     </p>
