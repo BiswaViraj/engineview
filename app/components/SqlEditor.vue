@@ -36,6 +36,9 @@ const extensions = [
   sql(),
   oneDark,
   surface,
+  // Wrap long lines instead of scrolling horizontally, so the editor never
+  // forces the page wider than the viewport (important on phones).
+  EditorView.lineWrapping,
   Prec.highest(
     keymap.of([
       {
@@ -66,6 +69,7 @@ const extensions = [
 
 <style scoped>
 .sql-editor {
+  min-width: 0;
   background: var(--surface-1);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);

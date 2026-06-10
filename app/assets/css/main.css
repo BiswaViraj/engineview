@@ -587,6 +587,54 @@ td.num {
   gap: var(--space-lg);
 }
 
+/* --- Scrollable wrapper for wide content (tables) on small screens ------ */
+
+.table-wrap {
+  overflow-x: auto;
+  min-width: 0;
+}
+
+/* --- Touch targets ------------------------------------------------------ */
+/* On touch devices, give interactive elements a comfortable 44px target
+   regardless of viewport size. */
+@media (pointer: coarse) {
+  button,
+  .nav-link,
+  input,
+  select {
+    min-height: 44px;
+  }
+  .segmented {
+    padding: 4px;
+  }
+  .segmented button {
+    min-height: 38px;
+  }
+}
+
+/* --- Mobile layout ------------------------------------------------------ */
+@media (max-width: 640px) {
+  main {
+    padding: var(--space-lg) var(--space-md) var(--space-2xl);
+  }
+  .app-header {
+    padding: 0 var(--space-md);
+    gap: var(--space-sm);
+  }
+  .app-header nav {
+    gap: 2px;
+  }
+  .nav-user {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .brand-label {
+    display: none;
+  }
+}
+
 /* --- Motion preferences ------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {

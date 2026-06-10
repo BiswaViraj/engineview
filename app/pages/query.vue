@@ -363,6 +363,7 @@ kbd {
   margin: 0;
   padding: 0;
   display: grid;
+  min-width: 0;
 }
 .saved-item {
   display: flex;
@@ -371,6 +372,7 @@ kbd {
   gap: var(--space-sm);
   padding: 10px 0;
   border-top: 1px solid var(--line-soft);
+  min-width: 0;
 }
 .saved-item:first-child {
   border-top: none;

@@ -16,7 +16,7 @@ const { data: session } = await authClient.useSession(useFetch);
             <rect x="10.5" y="0.5" width="3" height="13" rx="1" fill="var(--accent)" />
           </svg>
         </span>
-        EngineView
+        <span class="brand-label">EngineView</span>
       </NuxtLink>
       <nav class="m-nav">
         <a :href="GITHUB_URL" target="_blank" rel="noopener" class="m-link">GitHub</a>
@@ -34,7 +34,7 @@ const { data: session } = await authClient.useSession(useFetch);
 
     <footer class="m-footer">
       <div class="m-footer-inner">
-        <NuxtLink to="/" class="brand">
+        <NuxtLink to="/" class="brand" aria-label="EngineView home">
           <span class="brand-mark" aria-hidden="true">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <rect x="0.5" y="8" width="3" height="5.5" rx="1" fill="var(--accent)" />
@@ -42,7 +42,7 @@ const { data: session } = await authClient.useSession(useFetch);
               <rect x="10.5" y="0.5" width="3" height="13" rx="1" fill="var(--accent)" />
             </svg>
           </span>
-          EngineView
+          <span class="brand-label">EngineView</span>
         </NuxtLink>
         <span class="muted"
           >A self-hosted dashboard for Cloudflare Analytics Engine. MIT licensed.</span

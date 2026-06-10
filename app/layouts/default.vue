@@ -24,7 +24,7 @@ async function onSignOut() {
             <rect x="10.5" y="0.5" width="3" height="13" rx="1" fill="var(--accent)" />
           </svg>
         </span>
-        EngineView
+        <span class="brand-label">EngineView</span>
       </NuxtLink>
       <nav v-if="session">
         <NuxtLink to="/query" class="nav-link" :class="{ active: isActive('/query') }"

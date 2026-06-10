@@ -194,5 +194,10 @@ async function removeDashboard() {
   .add-panel-row {
     grid-template-columns: 1fr;
   }
+  /* Collapse to a single column so panels are full width on a phone. A panel's
+     stored span is clamped to the one available column. */
+  .panel-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

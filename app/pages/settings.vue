@@ -126,28 +126,37 @@ async function remove(id: string) {
     </div>
 
     <div v-if="connections && connections.length" class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Label</th>
-            <th>Account id</th>
-            <th>Default dataset</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="c in connections" :key="c.id">
-            <td>{{ c.label }}</td>
-            <td class="mono">{{ c.accountId }}</td>
-            <td>{{ c.defaultDataset || "none" }}</td>
-            <td class="row" style="border: 0; justify-content: flex-end">
-              <button class="ghost" @click="edit(c)">Edit</button>
-              <button class="ghost" @click="remove(c.id)">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Account id</th>
+              <th>Default dataset</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="c in connections" :key="c.id">
+              <td>{{ c.label }}</td>
+              <td class="mono">{{ c.accountId }}</td>
+              <td>{{ c.defaultDataset || "none" }}</td>
+              <td class="row actions-cell">
+                <button class="ghost" @click="edit(c)">Edit</button>
+                <button class="ghost" @click="remove(c.id)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <p v-else class="muted">No connections yet. Add one above to get started.</p>
   </div>
 </template>
+
+<style scoped>
+.actions-cell {
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+</style>
