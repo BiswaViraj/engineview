@@ -8,14 +8,14 @@ const emit = defineEmits<{ "update:modelValue": [string] }>();
 </script>
 
 <template>
-  <div class="segmented" role="tablist" :aria-label="ariaLabel">
+  <div class="segmented" role="radiogroup" :aria-label="ariaLabel">
     <button
       v-for="o in options"
       :key="o.value"
       type="button"
-      role="tab"
+      role="radio"
       :class="{ on: o.value === modelValue }"
-      :aria-selected="o.value === modelValue"
+      :aria-checked="o.value === modelValue"
       @click="emit('update:modelValue', o.value)"
     >
       {{ o.label }}

@@ -75,7 +75,7 @@ async function removeDashboard() {
     <div class="dash-head">
       <div class="stack" style="gap: 2px">
         <span class="eyebrow">Dashboard</span>
-        <h2 style="margin: 0">{{ data.dashboard.name }}</h2>
+        <h1 style="margin: 0">{{ data.dashboard.name }}</h1>
       </div>
       <span class="spacer" />
       <SegmentedControl

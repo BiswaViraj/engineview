@@ -37,7 +37,7 @@ async function resend() {
 
 <template>
   <div class="auth-wrap card stack">
-    <h2 style="margin: 0">Sign in</h2>
+    <h1 style="margin: 0">Sign in</h1>
     <form class="stack" @submit.prevent="submit">
       <label>
         Email

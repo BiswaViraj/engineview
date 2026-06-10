@@ -37,14 +37,33 @@ const props = withDefaults(
   { type: "line", height: 360 },
 );
 
+// Read chart colors from the design tokens so charts, the landing mock, and any
+// future theme stay in sync. Fallbacks keep things sane outside the browser.
+function token(name: string, fallback: string): string {
+  if (import.meta.client) {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    if (v) return v;
+  }
+  return fallback;
+}
+
 // Distinguishable by lightness as well as hue, so series stay readable without
 // relying on color alone.
-const PALETTE = ["#4d8dff", "#e3b341", "#43c4c0", "#d678c2", "#66cf83", "#e58b4a"];
+const PALETTE = [
+  token("--chart-1", "#4d8dff"),
+  token("--chart-2", "#e3b341"),
+  token("--chart-3", "#43c4c0"),
+  token("--chart-4", "#d678c2"),
+  token("--chart-5", "#66cf83"),
+  token("--chart-6", "#e58b4a"),
+];
 
 // Match the UI surfaces so charts feel native rather than dropped in.
-const TICK = "#7f8a9e";
-const GRID = "rgba(120, 134, 158, 0.12)";
-const LABEL = "#aab3c4";
+const TICK = token("--chart-axis", "#7f8a9e");
+const GRID = token("--chart-grid", "rgba(120, 134, 158, 0.12)");
+const LABEL = token("--chart-label", "#aab3c4");
+const TOOLTIP_BG = token("--chart-tooltip-bg", "#11161f");
+const TOOLTIP_FG = token("--chart-tooltip-fg", "#eef1f6");
 const GRID_FONT = {
   family: "'JetBrains Mono', ui-monospace, monospace",
   size: 10,
@@ -91,11 +110,11 @@ const options = {
       },
     },
     tooltip: {
-      backgroundColor: "#11161f",
+      backgroundColor: TOOLTIP_BG,
       borderColor: "rgba(120, 134, 158, 0.25)",
       borderWidth: 1,
       titleColor: LABEL,
-      bodyColor: "#eef1f6",
+      bodyColor: TOOLTIP_FG,
       padding: 10,
       cornerRadius: 8,
       titleFont: GRID_FONT,

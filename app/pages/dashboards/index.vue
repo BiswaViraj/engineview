@@ -30,7 +30,7 @@ async function create() {
 
 <template>
   <div class="stack">
-    <h2 style="margin: 0">Dashboards</h2>
+    <h1 style="margin: 0">Dashboards</h1>
     <div class="card">
       <div class="row">
         <input v-model="name" placeholder="New dashboard name" @keyup.enter="create" />

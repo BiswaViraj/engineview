@@ -245,7 +245,7 @@ const bars = [92, 64, 47, 38, 29, 22, 16, 11];
   font-weight: 600;
   padding: 2px 9px;
   border-radius: var(--radius-pill);
-  color: var(--accent);
+  color: oklch(0.86 0.05 256);
   background: var(--accent-quiet);
 }
 .frame-path {
@@ -276,17 +276,17 @@ const bars = [92, 64, 47, 38, 29, 22, 16, 11];
   opacity: 0.9;
 }
 .frame-bar-col:nth-child(2) {
-  background: #e3b341;
+  background: var(--chart-2);
 }
 
 .k {
-  color: #7aa2ff;
+  color: var(--syntax-keyword);
 }
 .fn {
-  color: #43c4c0;
+  color: var(--syntax-fn);
 }
 .mac {
-  color: #e3b341;
+  color: var(--syntax-macro);
   font-weight: 600;
 }
 
@@ -365,7 +365,7 @@ const bars = [92, 64, 47, 38, 29, 22, 16, 11];
   opacity: 0.85;
 }
 .chart-mini > div:nth-child(3) {
-  background: #43c4c0;
+  background: var(--chart-3);
 }
 .token-mock {
   display: flex;

@@ -143,6 +143,7 @@ async function remove(id: string) {
 
 <template>
   <div class="stack">
+    <h1 class="sr-only">Query</h1>
     <div v-if="!connections || connections.length === 0" class="empty">
       <span class="brand-mark empty-mark" aria-hidden="true">
         <svg width="18" height="18" viewBox="0 0 14 14" fill="none">
@@ -211,9 +212,9 @@ async function remove(id: string) {
               <label style="flex: 0 0 auto">
                 Type
                 <select v-model="chartType">
-                  <option value="line">line</option>
-                  <option value="area">area</option>
-                  <option value="bar">bar</option>
+                  <option value="line">Line</option>
+                  <option value="area">Area</option>
+                  <option value="bar">Bar</option>
                 </select>
               </label>
               <label style="flex: 0 0 auto">

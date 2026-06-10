@@ -81,7 +81,7 @@ async function remove(id: string) {
   <div class="stack">
     <div class="stack" style="gap: 4px">
       <span class="eyebrow">Connections</span>
-      <h2 style="margin: 0">Cloudflare accounts</h2>
+      <h1 style="margin: 0">Cloudflare accounts</h1>
     </div>
     <p class="lead">
       Connect a Cloudflare account to query its Analytics Engine datasets. The API token is

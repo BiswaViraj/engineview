@@ -30,7 +30,7 @@ async function submit() {
 <template>
   <div class="auth-wrap card stack">
     <template v-if="sent">
-      <h2 style="margin: 0">Check your email</h2>
+      <h1 style="margin: 0">Check your email</h1>
       <p class="muted">
         We sent a verification link to <strong>{{ email }}</strong
         >. Click it to activate your account, then sign in.
@@ -39,7 +39,7 @@ async function submit() {
     </template>
 
     <template v-else>
-      <h2 style="margin: 0">Create your account</h2>
+      <h1 style="margin: 0">Create your account</h1>
       <form class="stack" @submit.prevent="submit">
         <label>
           Name
