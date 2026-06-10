@@ -278,7 +278,7 @@ async function remove(id: string) {
         <ul v-else class="saved-list">
           <li v-for="q in saved" :key="q.id" class="saved-item">
             <button class="saved-name" @click="load(q)">{{ q.name }}</button>
-            <button class="ghost saved-del" @click="remove(q.id)">Delete</button>
+            <ConfirmButton class="saved-del" @confirm="remove(q.id)" />
           </li>
         </ul>
       </section>

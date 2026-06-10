@@ -83,7 +83,7 @@ async function toggleWidth() {
       <h3 class="panel-title">{{ panel.title }}</h3>
       <div class="panel-actions">
         <button class="ghost" @click="toggleWidth">{{ panel.posW >= 12 ? "Half" : "Full" }}</button>
-        <button class="ghost" @click="remove">Remove</button>
+        <ConfirmButton label="Remove" @confirm="remove" />
       </div>
     </header>
     <p v-if="loading" class="muted panel-status">Loading...</p>

@@ -84,7 +84,7 @@ async function removeDashboard() {
         aria-label="Time range"
         @update:model-value="setRange"
       />
-      <button class="danger" @click="removeDashboard">Delete</button>
+      <ConfirmButton label="Delete" confirm-label="Delete dashboard?" @confirm="removeDashboard" />
     </div>
 
     <div class="add-panel">
