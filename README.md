@@ -10,6 +10,17 @@ Each user brings their own Cloudflare account. API tokens are encrypted at rest
 and only ever decrypted on the server to run a query, so a token is never sent
 to the browser or shared between users.
 
+## Screenshots
+
+Write SQL against your datasets and switch between a table and a chart:
+
+![EngineView query runner showing a SQL query and an area chart of requests, cached and errors over a day](docs/screenshots/query-runner.png)
+
+Save the queries you care about and arrange them as panels on a dashboard with a
+shared time range:
+
+![EngineView dashboard with a top-referrers bar chart and a views-over-time line chart](docs/screenshots/dashboard.png)
+
 ## Status
 
 Working. Multi-user accounts, per-user Cloudflare connections, the SQL query
