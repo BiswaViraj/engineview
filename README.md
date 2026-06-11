@@ -3,8 +3,8 @@
 A multi-user dashboard for [Cloudflare Analytics Engine](https://developers.cloudflare.com/analytics/analytics-engine/).
 Cloudflare gives you a powerful time-series store but no UI and no way to save
 queries. EngineView lets people sign up, connect their own Cloudflare account,
-run SQL against their datasets, save the queries they care about, and (soon)
-chart them on dashboards.
+run SQL against their datasets, save the queries they care about, and chart
+them on multi-panel dashboards.
 
 Each user brings their own Cloudflare account. API tokens are encrypted at rest
 and only ever decrypted on the server to run a query, so a token is never sent
