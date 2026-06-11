@@ -89,6 +89,13 @@ your `$TMPDIR` path is too long for a unix socket. Run it with a short temp dir:
 
 ## Deploy
 
+Yes, it is a Cloudflare tool that does not run on Cloudflare, and that is on
+purpose. EngineView reads your data through the Analytics Engine SQL API over
+plain HTTPS, so the edge is never in the request path. That makes it a boringly
+portable server app: run it on a small VPS, with Docker, or on a host like Fly
+or Railway. You bring the Cloudflare account; the dashboard lives wherever you
+want it.
+
 ### Docker Compose
 
 The simplest way to run the whole stack (Postgres, migrations, app):
