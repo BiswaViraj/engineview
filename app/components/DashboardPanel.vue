@@ -92,7 +92,7 @@ async function toggleWidth() {
       <button v-if="panel.connectionId" class="ghost" @click="load">Retry</button>
     </div>
     <ClientOnly v-else>
-      <ChartView
+      <LazyChartView
         :rows="rows"
         :type="panel.chartType as ChartType"
         :x-column="axes.xColumn"

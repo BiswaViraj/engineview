@@ -259,7 +259,7 @@ async function remove(id: string) {
               </label>
             </div>
             <ClientOnly>
-              <ChartView
+              <LazyChartView
                 :rows="result.rows"
                 :type="chartType"
                 :x-column="xColumn"
