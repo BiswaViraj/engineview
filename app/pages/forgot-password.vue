@@ -41,7 +41,7 @@ async function submit() {
           <input v-model="email" type="email" required autocomplete="email" />
         </label>
         <button type="submit" :disabled="busy">
-          {{ busy ? "Sending..." : "Send reset link" }}
+          {{ busy ? "Sending…" : "Send reset link" }}
         </button>
         <p v-if="error" class="error">{{ error }}</p>
       </form>

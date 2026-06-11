@@ -40,7 +40,7 @@ async function create() {
           maxlength="120"
           @keyup.enter="create"
         />
-        <button :disabled="busy" @click="create">Create</button>
+        <button :disabled="busy" @click="create">{{ busy ? "Creating…" : "Create" }}</button>
       </div>
     </div>
 

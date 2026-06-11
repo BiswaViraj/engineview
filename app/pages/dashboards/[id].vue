@@ -107,7 +107,7 @@ async function removeDashboard() {
           <option value="area">Area</option>
           <option value="bar">Bar</option>
         </select>
-        <button type="submit" :disabled="adding">Add panel</button>
+        <button type="submit" :disabled="adding">{{ adding ? "Adding…" : "Add panel" }}</button>
       </form>
       <p class="muted add-panel-tip">
         Use <code>$SINCE</code> in a query (e.g. <code>timestamp &gt; $SINCE</code>) to follow the

@@ -60,7 +60,7 @@ async function submit() {
           />
         </label>
         <button type="submit" :disabled="busy">
-          {{ busy ? "Creating..." : "Create account" }}
+          {{ busy ? "Creating…" : "Create account" }}
         </button>
         <p v-if="error" class="error">{{ error }}</p>
       </form>

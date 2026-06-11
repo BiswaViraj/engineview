@@ -154,7 +154,7 @@ async function remove(id: string) {
         </label>
         <div class="row">
           <button type="submit" :disabled="createBusy">
-            {{ createBusy ? "Saving..." : "Add connection" }}
+            {{ createBusy ? "Saving…" : "Add connection" }}
           </button>
           <button type="button" class="ghost" @click="cancelAdd">Cancel</button>
         </div>
@@ -190,7 +190,7 @@ async function remove(id: string) {
             </label>
             <div class="row">
               <button type="submit" :disabled="editBusy">
-                {{ editBusy ? "Saving..." : "Save changes" }}
+                {{ editBusy ? "Saving…" : "Save changes" }}
               </button>
               <button type="button" class="ghost" @click="cancelEdit">Cancel</button>
             </div>

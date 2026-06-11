@@ -86,7 +86,7 @@ async function toggleWidth() {
         <ConfirmButton label="Remove" @confirm="remove" />
       </div>
     </header>
-    <p v-if="loading" class="muted panel-status">Loading...</p>
+    <p v-if="loading" class="muted panel-status">Loading…</p>
     <div v-else-if="error" class="panel-error" role="alert">
       <pre class="error">{{ error }}</pre>
       <button v-if="panel.connectionId" class="ghost" @click="load">Retry</button>

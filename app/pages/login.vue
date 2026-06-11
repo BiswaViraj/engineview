@@ -47,7 +47,7 @@ async function resend() {
         Password
         <input v-model="password" type="password" required autocomplete="current-password" />
       </label>
-      <button type="submit" :disabled="busy">{{ busy ? "Signing in..." : "Sign in" }}</button>
+      <button type="submit" :disabled="busy">{{ busy ? "Signing in…" : "Sign in" }}</button>
       <p v-if="error" class="error">{{ error }}</p>
       <button v-if="needsVerification" type="button" class="ghost" @click="resend">
         Resend verification email

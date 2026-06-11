@@ -53,7 +53,7 @@ async function submit() {
             autocomplete="new-password"
           />
         </label>
-        <button type="submit" :disabled="busy">{{ busy ? "Saving..." : "Set password" }}</button>
+        <button type="submit" :disabled="busy">{{ busy ? "Saving…" : "Set password" }}</button>
         <p v-if="error" class="error">{{ error }}</p>
       </form>
     </template>

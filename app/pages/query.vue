@@ -195,13 +195,13 @@ async function remove(id: string) {
       </ClientOnly>
 
       <div class="actions">
-        <button :disabled="running" @click="run">{{ running ? "Running..." : "Run" }}</button>
+        <button :disabled="running" @click="run">{{ running ? "Running…" : "Run" }}</button>
         <span class="kbd-hint" title="Run query"><kbd>Cmd</kbd><kbd>↵</kbd></span>
         <button class="ghost" @click="sampleQuery">Sample query</button>
         <span class="spacer" />
         <input
           v-model="name"
-          placeholder="Name this query..."
+          placeholder="Name this query…"
           class="save-input"
           aria-label="Name this query"
           @keyup.enter="save"
