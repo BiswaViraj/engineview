@@ -186,7 +186,11 @@ async function remove(id: string) {
       <ClientOnly>
         <SqlEditor v-model="sql" :placeholder="'SELECT ... FROM your_dataset'" @run="run" />
         <template #fallback>
-          <textarea :value="sql" placeholder="SELECT ... FROM your_dataset" />
+          <textarea
+            :value="sql"
+            placeholder="SELECT ... FROM your_dataset"
+            aria-label="SQL query editor"
+          />
         </template>
       </ClientOnly>
 

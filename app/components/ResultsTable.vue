@@ -59,7 +59,11 @@ function download() {
       >
       <span v-if="capped" class="cap-note">showing first {{ fmt(MAX_DISPLAY) }}</span>
       <span class="spacer" />
-      <button class="ghost" :title="`Download all ${fmt(rows.length)} rows as CSV`" @click="download">
+      <button
+        class="ghost"
+        :title="`Download all ${fmt(rows.length)} rows as CSV`"
+        @click="download"
+      >
         Download CSV
       </button>
     </div>

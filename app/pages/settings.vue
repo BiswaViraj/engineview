@@ -177,7 +177,7 @@ async function remove(id: string) {
               <input v-model="editForm.accountId" required />
             </label>
             <label>
-              API token
+              API token (optional)
               <input
                 v-model="editForm.apiToken"
                 type="password"

@@ -172,7 +172,10 @@ h3 {
 .skip-link:focus {
   top: var(--space-sm);
   text-decoration: none;
-  outline: none;
+  /* Transparent outline is invisible normally (the shadow ring shows) but is
+     rendered as a system colour in forced-colors mode, where shadows vanish. */
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: 0 0 0 3px var(--accent-quiet);
 }
 main:focus {
@@ -467,7 +470,10 @@ button:disabled {
   transform: none;
 }
 button:focus-visible {
-  outline: none;
+  /* Transparent outline is invisible normally (the shadow ring shows) but is
+     rendered as a system colour in forced-colors mode, where shadows vanish. */
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: 0 0 0 3px var(--accent-quiet);
 }
 
@@ -659,6 +665,21 @@ td.num {
 @media (max-width: 420px) {
   .brand-label {
     display: none;
+  }
+}
+
+/* --- Forced colors (Windows High Contrast) ------------------------------ */
+@media (forced-colors: active) {
+  /* Selected/active states are distinguished only by a background tint, which
+     is flattened in forced-colors. Mark them with an inset outline so they
+     stay visible without shifting layout. */
+  .segmented button.on {
+    outline: 1px solid;
+    outline-offset: -3px;
+  }
+  .nav-link.active {
+    outline: 1px solid;
+    outline-offset: -2px;
   }
 }
 
