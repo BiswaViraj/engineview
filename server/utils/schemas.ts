@@ -38,7 +38,7 @@ export const dashboardUpdateSchema = z.object({
   timeRange: z.string().trim().optional(),
 });
 
-export const chartTypeSchema = z.enum(["line", "area", "bar"]);
+export const chartTypeSchema = z.enum(["line", "area", "bar", "stat"]);
 
 export const panelCreateSchema = z.object({
   title: z.string().trim().min(1, "title is required"),

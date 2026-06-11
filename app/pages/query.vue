@@ -239,28 +239,31 @@ async function remove(id: string) {
                   <option value="line">Line</option>
                   <option value="area">Area</option>
                   <option value="bar">Bar</option>
+                  <option value="stat">Stat</option>
                 </select>
               </label>
-              <label style="flex: 0 0 auto">
-                X axis
-                <select v-model="xColumn">
-                  <option v-for="c in resultColumns" :key="c" :value="c">{{ c }}</option>
-                </select>
-              </label>
-              <span class="muted">Series:</span>
-              <label
-                v-for="c in resultColumns.filter((col) => col !== xColumn)"
-                :key="c"
-                style="flex-direction: row; align-items: center; gap: 6px"
-              >
-                <input
-                  type="checkbox"
-                  style="width: auto"
-                  :checked="yColumns.includes(c)"
-                  @change="toggleY(c)"
-                />
-                {{ c }}
-              </label>
+              <template v-if="chartType !== 'stat'">
+                <label style="flex: 0 0 auto">
+                  X axis
+                  <select v-model="xColumn">
+                    <option v-for="c in resultColumns" :key="c" :value="c">{{ c }}</option>
+                  </select>
+                </label>
+                <span class="muted">Series:</span>
+                <label
+                  v-for="c in resultColumns.filter((col) => col !== xColumn)"
+                  :key="c"
+                  style="flex-direction: row; align-items: center; gap: 6px"
+                >
+                  <input
+                    type="checkbox"
+                    style="width: auto"
+                    :checked="yColumns.includes(c)"
+                    @change="toggleY(c)"
+                  />
+                  {{ c }}
+                </label>
+              </template>
             </div>
             <ClientOnly>
               <LazyChartView

@@ -16,10 +16,10 @@ Write SQL against your datasets and switch between a table and a chart:
 
 ![EngineView query runner showing a SQL query and an area chart of requests, cached and errors over a day](docs/screenshots/query-runner.png)
 
-Save the queries you care about and arrange them as panels on a dashboard with a
-shared time range:
+Arrange saved queries as stat tiles and charts on a dashboard with a shared time
+range:
 
-![EngineView dashboard with a top-referrers bar chart and a views-over-time line chart](docs/screenshots/dashboard.png)
+![EngineView dashboard showing pageviews, visitors, requests and error stat tiles above a top-referrers bar chart and a views-over-time area chart](docs/screenshots/dashboard.png)
 
 ## Status
 
@@ -44,8 +44,9 @@ runner with charts, and multi-panel dashboards are all in place.
   Analytics Engine SQL API, and returns the rows. The token never leaves the
   server.
 - Saved queries and dashboards are stored in Postgres, scoped to each user.
-- A result can be charted (line, area or bar). Saved queries become dashboard
-  panels, laid out in a grid with a shared time range. A query can use the
+- A result can be charted (line, area or bar) or shown as a single stat tile.
+  Saved queries become dashboard panels, laid out in a grid with a shared time
+  range. A query can use the
   `$SINCE` token (e.g. `timestamp > $SINCE`), which expands to the dashboard's
   selected range.
 

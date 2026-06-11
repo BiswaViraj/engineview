@@ -12,7 +12,7 @@ import {
   LinearScale,
   Filler,
 } from "chart.js";
-import { buildChartData, type ChartType } from "~/lib/chart";
+import { buildChartData, statValue, type ChartType } from "~/lib/chart";
 
 ChartJS.register(
   Title,
@@ -138,14 +138,53 @@ const summary = computed(() => {
   }
   return `${props.type} chart of ${props.yColumns.join(", ")} by ${props.xColumn}, ${props.rows.length} points`;
 });
+
+// Single-value "stat" tile: one number, the column name as its label.
+const statResult = computed(() => statValue(props.rows));
+const STAT_FMT = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 });
+const formattedStat = computed(() => {
+  const v = statResult.value.value;
+  if (v === null) return "No data";
+  return typeof v === "number" ? STAT_FMT.format(v) : v;
+});
 </script>
 
 <template>
-  <div :style="{ height: `${height}px` }" role="img" :aria-label="summary">
-    <p v-if="rows.length === 0 || !xColumn || yColumns.length === 0" class="muted">
+  <div
+    :style="{ height: `${height}px` }"
+    :role="type === 'stat' ? undefined : 'img'"
+    :aria-label="type === 'stat' ? undefined : summary"
+  >
+    <div v-if="type === 'stat'" class="stat">
+      <span class="stat-value">{{ formattedStat }}</span>
+      <span v-if="statResult.label" class="stat-label">{{ statResult.label }}</span>
+    </div>
+    <p v-else-if="rows.length === 0 || !xColumn || yColumns.length === 0" class="muted">
       Nothing to chart yet.
     </p>
     <Bar v-else-if="type === 'bar'" :data="chartData" :options="options" />
     <Line v-else :data="chartData" :options="options" />
   </div>
 </template>
+
+<style scoped>
+.stat {
+  height: 100%;
+  display: grid;
+  place-content: center start;
+  gap: var(--space-2xs);
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 4vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.stat-label {
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+</style>

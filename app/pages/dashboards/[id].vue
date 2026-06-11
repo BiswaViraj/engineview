@@ -106,6 +106,7 @@ async function removeDashboard() {
           <option value="line">Line</option>
           <option value="area">Area</option>
           <option value="bar">Bar</option>
+          <option value="stat">Stat</option>
         </select>
         <button type="submit" :disabled="adding">{{ adding ? "Adding…" : "Add panel" }}</button>
       </form>

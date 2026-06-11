@@ -2,7 +2,7 @@
 // any framework so it can be unit-tested and reused by the runner and dashboard
 // panels.
 
-export type ChartType = "line" | "bar" | "area";
+export type ChartType = "line" | "bar" | "area" | "stat";
 
 export interface ChartSeries {
   labels: (string | number)[];
@@ -53,4 +53,20 @@ export function defaultAxes(
   // Fall back to any non-x column so a chart is still possible without type info.
   if (yColumns.length === 0) yColumns = columns.slice(1).map((c) => c.name);
   return { xColumn, yColumns };
+}
+
+// For a single-value "stat" tile: take the first numeric column of the first
+// row (the query is expected to return one aggregate row, e.g.
+// `SELECT sum(_sample_interval) AS views ...`). Falls back to the first column.
+export function statValue(rows: Record<string, unknown>[]): {
+  value: number | string | null;
+  label: string;
+} {
+  if (rows.length === 0) return { value: null, label: "" };
+  const row = rows[0]!;
+  const keys = Object.keys(row);
+  const col = keys.find((k) => toNumber(row[k]) !== null) ?? keys[0] ?? "";
+  const raw = row[col];
+  const n = toNumber(raw);
+  return { value: n ?? (raw == null ? null : String(raw)), label: col };
 }

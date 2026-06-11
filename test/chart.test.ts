@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildChartData, defaultAxes } from "../app/lib/chart";
+import { buildChartData, defaultAxes, statValue } from "../app/lib/chart";
 
 describe("buildChartData", () => {
   const rows = [
@@ -59,5 +59,30 @@ describe("defaultAxes", () => {
 
   it("handles an empty result", () => {
     expect(defaultAxes([], [])).toEqual({ xColumn: "", yColumns: [] });
+  });
+});
+
+describe("statValue", () => {
+  it("takes the first numeric column of the first row", () => {
+    expect(statValue([{ views: 3000 }])).toEqual({ value: 3000, label: "views" });
+  });
+
+  it("skips leading non-numeric columns", () => {
+    expect(statValue([{ label: "7 days", total: 48210 }])).toEqual({
+      value: 48210,
+      label: "total",
+    });
+  });
+
+  it("coerces numeric strings", () => {
+    expect(statValue([{ count: "1234" }])).toEqual({ value: 1234, label: "count" });
+  });
+
+  it("falls back to the first column when nothing is numeric", () => {
+    expect(statValue([{ status: "ok" }])).toEqual({ value: "ok", label: "status" });
+  });
+
+  it("returns null for an empty result", () => {
+    expect(statValue([])).toEqual({ value: null, label: "" });
   });
 });
