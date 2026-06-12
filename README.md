@@ -23,8 +23,8 @@ range:
 
 ## Status
 
-Working. Multi-user accounts, per-user Cloudflare connections, the SQL query
-runner with charts, and multi-panel dashboards are all in place.
+Multi-user accounts, per-user Cloudflare connections, the SQL query runner with
+charts and stat tiles, and multi-panel dashboards are all in place.
 
 ## Stack
 
