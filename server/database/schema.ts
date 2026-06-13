@@ -71,11 +71,29 @@ export const cloudflareConnection = pgTable("cloudflare_connection", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const app = pgTable("app", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  connectionId: uuid("connection_id")
+    .notNull()
+    .references(() => cloudflareConnection.id, { onDelete: "restrict" }),
+  name: text("name").notNull(),
+  dataset: text("dataset"),
+  url: text("url"),
+  logoUrl: text("logo_url"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const savedQuery = pgTable("saved_query", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
+  appId: uuid("app_id")
+    .notNull()
+    .references(() => app.id, { onDelete: "cascade" }),
   connectionId: uuid("connection_id").references(() => cloudflareConnection.id, {
     onDelete: "set null",
   }),
@@ -89,6 +107,9 @@ export const dashboard = pgTable("dashboard", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
+  appId: uuid("app_id")
+    .notNull()
+    .references(() => app.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   timeRange: text("time_range").notNull().default("24 HOUR"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

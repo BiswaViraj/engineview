@@ -17,9 +17,26 @@ export const connectionUpdateSchema = z.object({
   defaultDataset: z.string().trim().optional(),
 });
 
+export const appCreateSchema = z.object({
+  name: z.string().trim().min(1, "name is required"),
+  connectionId: z.uuid("a valid connectionId is required"),
+  dataset: z.string().trim().optional(),
+  url: z.string().trim().optional(),
+  logoUrl: z.string().trim().optional(),
+});
+
+export const appUpdateSchema = z.object({
+  name: z.string().trim().min(1).optional(),
+  connectionId: z.uuid().optional(),
+  dataset: z.string().trim().nullable().optional(),
+  url: z.string().trim().nullable().optional(),
+  logoUrl: z.string().trim().nullable().optional(),
+});
+
 export const savedQueryCreateSchema = z.object({
   name: z.string().trim().min(1, "name is required"),
   sql: z.string().trim().min(1, "sql is required"),
+  appId: z.uuid("a valid appId is required"),
   connectionId: z.uuid().nullish(),
 });
 
@@ -31,6 +48,7 @@ export const queryRunSchema = z.object({
 
 export const dashboardCreateSchema = z.object({
   name: z.string().trim().min(1, "name is required"),
+  appId: z.uuid("a valid appId is required"),
 });
 
 export const dashboardUpdateSchema = z.object({
