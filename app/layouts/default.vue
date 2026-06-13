@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { authClient, signOut } from "~/lib/auth-client";
+import { type authClient, signOut } from "~/lib/auth-client";
 
-const { data: session } = await authClient.useSession(useFetch);
+type Session = typeof authClient.$Infer.Session;
+
+// Source the session from a payload-backed useFetch (not better-auth's
+// useSession, whose client store re-initialises empty and syncs only after
+// mount) so session-gated chrome hydrates identically server and client.
+const { data: session } = await useFetch<Session>("/api/auth/get-session", {
+  headers: import.meta.server ? useRequestHeaders(["cookie"]) : undefined,
+});
 
 const route = useRoute();
 const isActive = (path: string) =>
