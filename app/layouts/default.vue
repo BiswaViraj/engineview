@@ -7,6 +7,8 @@ const route = useRoute();
 const isActive = (path: string) =>
   path === "/" ? route.path === "/" : route.path.startsWith(path);
 
+const currentAppId = computed(() => route.params.appId as string | undefined);
+
 async function onSignOut() {
   await signOut();
   await navigateTo("/login");
@@ -17,7 +19,7 @@ async function onSignOut() {
   <div>
     <a href="#main" class="skip-link">Skip to content</a>
     <header class="app-header">
-      <NuxtLink to="/" class="brand" aria-label="EngineView home">
+      <NuxtLink to="/apps" class="brand" aria-label="EngineView home">
         <span class="brand-mark" aria-hidden="true">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <rect x="0.5" y="8" width="3" height="5.5" rx="1" fill="var(--accent)" />
@@ -28,12 +30,8 @@ async function onSignOut() {
         <span class="brand-label">EngineView</span>
       </NuxtLink>
       <nav v-if="session">
-        <NuxtLink to="/query" class="nav-link" :class="{ active: isActive('/query') }"
-          >Query</NuxtLink
-        >
-        <NuxtLink to="/dashboards" class="nav-link" :class="{ active: isActive('/dashboards') }">
-          Dashboards
-        </NuxtLink>
+        <NuxtLink to="/apps" class="nav-link" :class="{ active: isActive('/apps') }">Apps</NuxtLink>
+        <AppSwitcher v-if="currentAppId" :current-id="currentAppId" />
         <NuxtLink to="/settings" class="nav-link" :class="{ active: isActive('/settings') }">
           Connections
         </NuxtLink>

@@ -27,7 +27,7 @@ const bars = [92, 64, 47, 38, 29, 22, 16, 11];
           infrastructure.
         </p>
         <div class="hero-cta">
-          <NuxtLink v-if="session" to="/query"><button>Open app</button></NuxtLink>
+          <NuxtLink v-if="session" to="/apps"><button>Open app</button></NuxtLink>
           <NuxtLink v-else to="/signup"><button>Get started</button></NuxtLink>
           <a :href="GITHUB_URL" target="_blank" rel="noopener"
             ><button class="ghost">View on GitHub</button></a
@@ -151,7 +151,7 @@ const bars = [92, 64, 47, 38, 29, 22, 16, 11];
     <section class="final">
       <h2 class="final-title">Deploy it on your own account.</h2>
       <div class="hero-cta">
-        <NuxtLink v-if="session" to="/query"><button>Open app</button></NuxtLink>
+        <NuxtLink v-if="session" to="/apps"><button>Open app</button></NuxtLink>
         <NuxtLink v-else to="/signup"><button>Get started</button></NuxtLink>
         <a :href="GITHUB_URL" target="_blank" rel="noopener"
           ><button class="ghost">View on GitHub</button></a

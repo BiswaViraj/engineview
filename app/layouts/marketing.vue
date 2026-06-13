@@ -22,7 +22,7 @@ const { data: session } = await authClient.useSession(useFetch);
       <nav class="m-nav">
         <a :href="GITHUB_URL" target="_blank" rel="noopener" class="m-link">GitHub</a>
         <template v-if="session">
-          <NuxtLink to="/query"><button>Open app</button></NuxtLink>
+          <NuxtLink to="/apps"><button>Open app</button></NuxtLink>
         </template>
         <template v-else>
           <NuxtLink to="/login" class="m-link">Sign in</NuxtLink>
