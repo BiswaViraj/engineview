@@ -8,7 +8,11 @@ interface Dashboard {
   createdAt: string;
 }
 
-const { data: dashboards } = await useFetch<Dashboard[]>("/api/dashboards", { default: () => [] });
+const appId = useRoute().params.appId as string;
+
+const { data: dashboards } = await useFetch<Dashboard[]>(`/api/dashboards?appId=${appId}`, {
+  default: () => [],
+});
 const name = ref("");
 const busy = ref(false);
 
@@ -19,9 +23,9 @@ async function create() {
   try {
     const d = await $fetch<Dashboard>("/api/dashboards", {
       method: "POST",
-      body: { name: trimmed },
+      body: { name: trimmed, appId },
     });
-    await navigateTo(`/dashboards/${d.id}`);
+    await navigateTo(`/apps/${appId}/dashboards/${d.id}`);
   } finally {
     busy.value = false;
   }
@@ -30,6 +34,7 @@ async function create() {
 
 <template>
   <div class="stack">
+    <AppSubnav :app-id="appId" />
     <h1>Dashboards</h1>
     <div class="card">
       <div class="create-row">
@@ -46,7 +51,9 @@ async function create() {
 
     <div v-if="dashboards && dashboards.length" class="card stack">
       <div v-for="d in dashboards" :key="d.id" class="dash-row">
-        <NuxtLink :to="`/dashboards/${d.id}`" class="dash-name">{{ d.name }}</NuxtLink>
+        <NuxtLink :to="`/apps/${appId}/dashboards/${d.id}`" class="dash-name">{{
+          d.name
+        }}</NuxtLink>
         <span class="muted dash-range">last {{ d.timeRange.toLowerCase() }}</span>
       </div>
     </div>

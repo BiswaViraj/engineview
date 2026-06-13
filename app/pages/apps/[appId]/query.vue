@@ -4,11 +4,13 @@ import { extractApiError } from "~/lib/errors";
 
 definePageMeta({ middleware: "auth" });
 
-interface Connection {
+interface AppItem {
   id: string;
-  label: string;
-  accountId: string;
-  defaultDataset: string | null;
+  name: string;
+  connectionId: string;
+  dataset: string | null;
+  url: string | null;
+  logoUrl: string | null;
 }
 interface SavedQuery {
   id: string;
@@ -26,24 +28,13 @@ interface QueryResult {
   elapsedMs: number;
 }
 
-const SQL_KEY = "ev_sql";
+const appId = useRoute().params.appId as string;
+const SQL_KEY = `ev_sql_${appId}`;
 
-const { data: connections } = await useFetch<Connection[]>("/api/connections", {
-  default: () => [],
-});
-const { data: saved, refresh: refreshSaved } = await useFetch<SavedQuery[]>("/api/queries", {
-  default: () => [],
-});
-
-const selectedConnectionId = ref<string>("");
-watchEffect(() => {
-  if (!selectedConnectionId.value && connections.value?.length) {
-    selectedConnectionId.value = connections.value[0]!.id;
-  }
-});
-
-const selectedConnection = computed(() =>
-  connections.value?.find((c) => c.id === selectedConnectionId.value),
+const { data: appData } = await useFetch<AppItem>(`/api/apps/${appId}`);
+const { data: saved, refresh: refreshSaved } = await useFetch<SavedQuery[]>(
+  `/api/queries?appId=${appId}`,
+  { default: () => [] },
 );
 
 const sql = ref("");
@@ -89,14 +80,14 @@ watch(sql, (v) => {
 });
 
 function sampleQuery() {
-  const ds = selectedConnection.value?.defaultDataset || "your_dataset";
+  const ds = appData.value?.dataset || "your_dataset";
   sql.value = `SELECT\n  blob1 AS dimension,\n  SUM(_sample_interval) AS count\nFROM ${ds}\nWHERE timestamp > NOW() - INTERVAL '24' HOUR\nGROUP BY dimension\nORDER BY count DESC\nLIMIT 100`;
 }
 
 async function run() {
   if (!sql.value.trim() || running.value) return;
-  if (!selectedConnectionId.value) {
-    error.value = "Add and select a Cloudflare connection first.";
+  if (!appData.value?.connectionId) {
+    error.value = "This app has no connection configured.";
     return;
   }
   running.value = true;
@@ -107,7 +98,7 @@ async function run() {
   try {
     const body = await $fetch<{ data?: Record<string, unknown>[]; meta?: ColumnMeta[] }>(
       "/api/query",
-      { method: "POST", body: { connectionId: selectedConnectionId.value, sql: sql.value } },
+      { method: "POST", body: { connectionId: appData.value.connectionId, sql: sql.value } },
     );
     const rows = body.data ?? [];
     result.value = {
@@ -131,7 +122,12 @@ async function save() {
   try {
     await $fetch("/api/queries", {
       method: "POST",
-      body: { name: trimmed, sql: sql.value, connectionId: selectedConnectionId.value || null },
+      body: {
+        name: trimmed,
+        sql: sql.value,
+        appId,
+        connectionId: appData.value?.connectionId ?? null,
+      },
     });
     name.value = "";
     await refreshSaved();
@@ -142,9 +138,6 @@ async function save() {
 
 function load(q: SavedQuery) {
   sql.value = q.sql;
-  if (q.connectionId && connections.value?.some((c) => c.id === q.connectionId)) {
-    selectedConnectionId.value = q.connectionId;
-  }
 }
 
 async function remove(id: string) {
@@ -155,32 +148,13 @@ async function remove(id: string) {
 
 <template>
   <div class="stack">
+    <AppSubnav :app-id="appId" />
     <h1 class="sr-only">Query</h1>
-    <div v-if="!connections || connections.length === 0" class="empty">
-      <span class="brand-mark empty-mark" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 14 14" fill="none">
-          <rect x="0.5" y="8" width="3" height="5.5" rx="1" fill="var(--accent)" />
-          <rect x="5.5" y="4" width="3" height="9.5" rx="1" fill="var(--accent)" />
-          <rect x="10.5" y="0.5" width="3" height="13" rx="1" fill="var(--accent)" />
-        </svg>
-      </span>
-      <p class="empty-title">Connect a Cloudflare account</p>
-      <p class="muted">Add a connection to run SQL against your Analytics Engine datasets.</p>
-      <button @click="navigateTo('/settings')">Add a connection</button>
-    </div>
 
-    <template v-else>
-      <div class="runner-head">
-        <label class="conn">
-          <span class="muted">Connection</span>
-          <select v-model="selectedConnectionId">
-            <option v-for="c in connections" :key="c.id" :value="c.id">{{ c.label }}</option>
-          </select>
-        </label>
+    <template v-if="appData">
+      <div v-if="appData.dataset" class="runner-head">
         <span class="spacer" />
-        <span v-if="selectedConnection?.defaultDataset" class="mono dataset-hint">
-          {{ selectedConnection.defaultDataset }}
-        </span>
+        <span class="mono dataset-hint">{{ appData.dataset }}</span>
       </div>
 
       <ClientOnly>
@@ -299,16 +273,6 @@ async function remove(id: string) {
   align-items: center;
   gap: var(--space-md);
 }
-.conn {
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-sm);
-}
-.conn select {
-  width: auto;
-  min-width: 160px;
-  max-width: 260px;
-}
 .dataset-hint {
   padding: 4px 10px;
   border-radius: var(--radius-pill);
@@ -342,31 +306,6 @@ kbd {
   border-radius: 5px;
   font-size: 11px;
   color: var(--text-3);
-}
-
-.empty {
-  display: grid;
-  gap: var(--space-xs);
-  place-items: center;
-  text-align: center;
-  padding: var(--space-3xl) var(--space-lg);
-  border: 1px dashed var(--line);
-  border-radius: var(--radius-lg);
-}
-.empty-mark {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  margin-bottom: var(--space-xs);
-}
-.empty-title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--text-md);
-  margin: 0;
-}
-.empty button {
-  margin-top: var(--space-sm);
 }
 
 .saved {

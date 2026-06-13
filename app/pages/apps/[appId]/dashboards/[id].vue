@@ -22,10 +22,13 @@ interface SavedQuery {
 }
 
 const route = useRoute();
+const appId = route.params.appId as string;
 const id = route.params.id as string;
 
 const { data, error, refresh } = await useFetch<DashboardData>(`/api/dashboards/${id}`);
-const { data: saved } = await useFetch<SavedQuery[]>("/api/queries", { default: () => [] });
+const { data: saved } = await useFetch<SavedQuery[]>(`/api/queries?appId=${appId}`, {
+  default: () => [],
+});
 
 const RANGES = ["1 HOUR", "24 HOUR", "7 DAY", "30 DAY"];
 const rangeOptions = RANGES.map((r) => ({
@@ -61,14 +64,15 @@ async function addPanel() {
 
 async function removeDashboard() {
   await $fetch(`/api/dashboards/${id}`, { method: "DELETE" });
-  await navigateTo("/dashboards");
+  await navigateTo(`/apps/${appId}/dashboards`);
 }
 </script>
 
 <template>
   <div v-if="error" class="card">
     <p class="muted">
-      Dashboard not found. <NuxtLink to="/dashboards">Back to dashboards</NuxtLink>
+      Dashboard not found.
+      <NuxtLink :to="`/apps/${appId}/dashboards`">Back to dashboards</NuxtLink>
     </p>
   </div>
   <div v-else-if="data" class="stack">
@@ -89,7 +93,8 @@ async function removeDashboard() {
 
     <div class="add-panel">
       <p v-if="!saved || saved.length === 0" class="muted">
-        Save a query first on the <NuxtLink to="/query">Query</NuxtLink> page, then add it here.
+        Save a query first on the <NuxtLink :to="`/apps/${appId}/query`">Query</NuxtLink> page, then
+        add it here.
       </p>
       <form v-else class="add-panel-row" @submit.prevent="addPanel">
         <input
