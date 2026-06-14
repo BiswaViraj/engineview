@@ -480,10 +480,10 @@ async function remove(id: string) {
   gap: var(--space-2xs);
   padding: 4px 6px 4px 10px;
   border-radius: var(--radius-pill);
-  background: var(--surface-2);
-  border: 1px solid var(--line-soft);
+  background: var(--accent-quiet);
+  border: 1px solid var(--accent-line);
   font-size: var(--text-xs);
-  color: var(--text-2);
+  color: var(--text);
   white-space: nowrap;
 }
 .chip-clear {
