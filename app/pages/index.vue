@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { authClient } from "~/lib/auth-client";
+import type { authClient } from "~/lib/auth-client";
 import { GITHUB_URL } from "~/lib/site";
 
 definePageMeta({ layout: "marketing" });
@@ -8,7 +8,13 @@ useHead({
   title: "EngineView — a dashboard for Cloudflare Analytics Engine",
 });
 
-const { data: session } = await authClient.useSession(useFetch);
+type Session = typeof authClient.$Infer.Session;
+
+// Payload-backed session (not better-auth's useSession, whose client store
+// re-initialises empty) so the session-gated CTA hydrates identically.
+const { data: session } = await useFetch<Session>("/api/auth/get-session", {
+  headers: import.meta.server ? useRequestHeaders(["cookie"]) : undefined,
+});
 
 // A few bar heights for the product-frame chart mock (top referrers shape).
 const bars = [92, 64, 47, 38, 29, 22, 16, 11];
