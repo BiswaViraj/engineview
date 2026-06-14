@@ -33,7 +33,14 @@ export default defineEventHandler(async (event) => {
     },
   );
 
-  const body = await res.json().catch(() => null);
-  if (!res.ok) setResponseStatus(event, res.status);
-  return body;
+  if (!res.ok) {
+    // Analytics Engine reports query errors as plain text, not JSON, so read the
+    // raw body and surface it instead of a bare status code.
+    const detail = (await res.text().catch(() => "")).trim();
+    console.warn(`[query] Analytics Engine ${res.status}: ${detail}`);
+    setResponseStatus(event, res.status);
+    return { error: detail || `Analytics Engine returned ${res.status}.` };
+  }
+
+  return await res.json().catch(() => null);
 });
