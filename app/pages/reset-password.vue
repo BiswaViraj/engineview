@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { authClient } from "~/lib/auth-client";
 
+definePageMeta({ layout: "auth" });
+
 const route = useRoute();
 const token = computed(() => (route.query.token as string) || "");
 const invalid = computed(() => route.query.error === "INVALID_TOKEN" || !token.value);

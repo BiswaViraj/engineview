@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { signIn, authClient } from "~/lib/auth-client";
 
+definePageMeta({ layout: "auth" });
+
 const route = useRoute();
 const email = ref("");
 const password = ref("");

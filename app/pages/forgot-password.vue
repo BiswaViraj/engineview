@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { authClient } from "~/lib/auth-client";
 
+definePageMeta({ layout: "auth" });
+
 const email = ref("");
 const busy = ref(false);
 const sent = ref(false);
