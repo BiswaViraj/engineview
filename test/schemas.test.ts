@@ -5,6 +5,7 @@ import {
   chartTypeSchema,
   dashboardCreateSchema,
   savedQueryCreateSchema,
+  savedQueryUpdateSchema,
 } from "../server/utils/schemas";
 
 const UUID = "11111111-1111-4111-8111-111111111111";
@@ -33,6 +34,16 @@ describe("appUpdateSchema", () => {
   it("allows partial and empty updates", () => {
     expect(appUpdateSchema.safeParse({}).success).toBe(true);
     expect(appUpdateSchema.safeParse({ name: "Renamed" }).success).toBe(true);
+  });
+});
+
+describe("savedQueryUpdateSchema", () => {
+  it("allows partial updates but rejects blank name or sql", () => {
+    expect(savedQueryUpdateSchema.safeParse({}).success).toBe(true);
+    expect(savedQueryUpdateSchema.safeParse({ name: "Renamed" }).success).toBe(true);
+    expect(savedQueryUpdateSchema.safeParse({ sql: "select 1" }).success).toBe(true);
+    expect(savedQueryUpdateSchema.safeParse({ name: "" }).success).toBe(false);
+    expect(savedQueryUpdateSchema.safeParse({ sql: "" }).success).toBe(false);
   });
 });
 

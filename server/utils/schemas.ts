@@ -40,6 +40,11 @@ export const savedQueryCreateSchema = z.object({
   connectionId: z.uuid().nullish(),
 });
 
+export const savedQueryUpdateSchema = z.object({
+  name: z.string().trim().min(1).optional(),
+  sql: z.string().trim().min(1).optional(),
+});
+
 export const queryRunSchema = z.object({
   connectionId: z.uuid("a valid connectionId is required"),
   sql: z.string().trim().min(1, "sql is required"),
