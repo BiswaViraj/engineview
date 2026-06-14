@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { defaultAxes, type ChartType } from "~/lib/chart";
+import { downloadCsv } from "~/lib/csv";
 import { extractApiError } from "~/lib/errors";
 
 interface Panel {
@@ -62,6 +63,14 @@ const axes = computed(() => {
   return defaultAxes(meta.value, rows.value);
 });
 
+const colNames = computed(() =>
+  meta.value.length ? meta.value.map((m) => m.name) : Object.keys(rows.value[0] ?? {}),
+);
+
+function exportCsv() {
+  downloadCsv(`${props.panel.title || "panel"}.csv`, colNames.value, rows.value);
+}
+
 onMounted(load);
 watch(() => props.timeRange, load);
 
@@ -82,6 +91,13 @@ async function toggleWidth() {
     <header class="panel-head">
       <h3 class="panel-title">{{ panel.title }}</h3>
       <div class="panel-actions">
+        <button
+          v-if="panel.chartType === 'table' && !error && rows.length"
+          class="ghost"
+          @click="exportCsv"
+        >
+          CSV
+        </button>
         <button class="ghost" @click="toggleWidth">{{ panel.posW >= 12 ? "Half" : "Full" }}</button>
         <ConfirmButton label="Remove" @confirm="remove" />
       </div>
@@ -91,15 +107,24 @@ async function toggleWidth() {
       <pre class="error">{{ error }}</pre>
       <button v-if="panel.connectionId" class="ghost" @click="load">Retry</button>
     </div>
-    <ClientOnly v-else>
-      <LazyChartView
+    <template v-else>
+      <ResultsTable
+        v-if="panel.chartType === 'table'"
         :rows="rows"
-        :type="panel.chartType as ChartType"
-        :x-column="axes.xColumn"
-        :y-columns="axes.yColumns"
-        :height="panel.posH * 28"
+        :meta="meta"
+        compact
+        :max-height="`${panel.posH * 28}px`"
       />
-    </ClientOnly>
+      <ClientOnly v-else>
+        <LazyChartView
+          :rows="rows"
+          :type="panel.chartType as ChartType"
+          :x-column="axes.xColumn"
+          :y-columns="axes.yColumns"
+          :height="panel.posH * 28"
+        />
+      </ClientOnly>
+    </template>
   </section>
 </template>
 
