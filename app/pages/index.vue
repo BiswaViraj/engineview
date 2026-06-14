@@ -175,6 +175,11 @@ const bars = [92, 64, 47, 38, 29, 22, 16, 11];
   max-width: 1080px;
   margin: 0 auto;
   padding: 0 clamp(var(--space-lg), 5vw, var(--space-3xl));
+  /* The hero's decorative grid bleeds past the right edge (masked to
+     transparent); clip it so it can't add phantom width and a horizontal
+     scrollbar. overflow-x: clip keeps vertical scroll and the sticky header
+     (which lives outside this element) untouched. */
+  overflow-x: clip;
 }
 
 /* Hero ----------------------------------------------------------------------*/
