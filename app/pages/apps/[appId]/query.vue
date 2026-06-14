@@ -36,6 +36,12 @@ const { data: saved, refresh: refreshSaved } = await useFetch<SavedQuery[]>(
   `/api/queries?appId=${appId}`,
   { default: () => [] },
 );
+const { data: connections } = await useFetch<{ id: string; label: string }[]>("/api/connections", {
+  default: () => [],
+});
+const connectionLabel = computed(
+  () => connections.value.find((c) => c.id === appData.value?.connectionId)?.label ?? "",
+);
 
 const sql = ref("");
 const name = ref("");
@@ -152,9 +158,13 @@ async function remove(id: string) {
     <h1 class="sr-only">Query</h1>
 
     <template v-if="appData">
-      <div v-if="appData.dataset" class="runner-head">
-        <span class="spacer" />
-        <span class="mono dataset-hint">{{ appData.dataset }}</span>
+      <div class="runner-head">
+        <span class="runner-context muted">
+          {{ connectionLabel
+          }}<template v-if="appData.dataset">
+            · <span class="mono">{{ appData.dataset }}</span></template
+          >
+        </span>
       </div>
 
       <ClientOnly>
@@ -271,14 +281,9 @@ async function remove(id: string) {
 .runner-head {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
 }
-.dataset-hint {
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  background: var(--surface-1);
-  border: 1px solid var(--line-soft);
-  color: var(--text-3);
+.runner-context {
+  font-size: var(--text-sm);
 }
 
 .actions {

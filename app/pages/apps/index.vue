@@ -87,10 +87,7 @@ const hasApps = computed(() => (apps.value?.length ?? 0) > 0);
 <template>
   <div class="stack">
     <div class="head">
-      <div class="stack" style="gap: var(--space-2xs)">
-        <span class="eyebrow">Apps</span>
-        <h1>Apps</h1>
-      </div>
+      <h1>Apps</h1>
       <span class="spacer" />
       <button v-if="hasConnections && !adding" @click="openAdd">Add app</button>
     </div>

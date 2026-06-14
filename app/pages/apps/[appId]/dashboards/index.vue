@@ -35,7 +35,7 @@ async function create() {
 <template>
   <div class="stack">
     <AppSubnav :app-id="appId" />
-    <h1>Dashboards</h1>
+    <h1 class="sr-only">Dashboards</h1>
     <div class="card">
       <div class="create-row">
         <input
