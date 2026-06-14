@@ -45,6 +45,7 @@ const connectionLabel = computed(
 
 const sql = ref("");
 const name = ref("");
+const editingId = ref<string | null>(null);
 const result = ref<QueryResult | null>(null);
 const running = ref(false);
 const saving = ref(false);
@@ -121,21 +122,45 @@ async function run() {
   }
 }
 
+async function createQuery(nameValue: string): Promise<SavedQuery> {
+  return await $fetch<SavedQuery>("/api/queries", {
+    method: "POST",
+    body: {
+      name: nameValue,
+      sql: sql.value,
+      appId,
+      connectionId: appData.value?.connectionId ?? null,
+    },
+  });
+}
+
 async function save() {
   const trimmed = name.value.trim();
   if (!trimmed || !sql.value.trim() || saving.value) return;
   saving.value = true;
   try {
-    await $fetch("/api/queries", {
-      method: "POST",
-      body: {
-        name: trimmed,
-        sql: sql.value,
-        appId,
-        connectionId: appData.value?.connectionId ?? null,
-      },
-    });
-    name.value = "";
+    if (editingId.value) {
+      await $fetch(`/api/queries/${editingId.value}`, {
+        method: "PUT",
+        body: { name: trimmed, sql: sql.value },
+      });
+    } else {
+      const created = await createQuery(trimmed);
+      editingId.value = created.id;
+    }
+    await refreshSaved();
+  } finally {
+    saving.value = false;
+  }
+}
+
+async function saveAsNew() {
+  const trimmed = name.value.trim();
+  if (!trimmed || !sql.value.trim() || saving.value) return;
+  saving.value = true;
+  try {
+    const created = await createQuery(trimmed);
+    editingId.value = created.id;
     await refreshSaved();
   } finally {
     saving.value = false;
@@ -144,6 +169,13 @@ async function save() {
 
 function load(q: SavedQuery) {
   sql.value = q.sql;
+  name.value = q.name;
+  editingId.value = q.id;
+}
+
+function clearEditing() {
+  editingId.value = null;
+  name.value = "";
 }
 
 async function remove(id: string) {
@@ -183,6 +215,17 @@ async function remove(id: string) {
         <span class="kbd-hint" title="Run query"><kbd>Cmd</kbd><kbd>↵</kbd></span>
         <button class="ghost" @click="sampleQuery">Sample query</button>
         <span class="spacer" />
+        <span v-if="editingId" class="editing-chip">
+          Editing
+          <button
+            type="button"
+            class="chip-clear"
+            aria-label="Start a new query"
+            @click="clearEditing"
+          >
+            ×
+          </button>
+        </span>
         <input
           v-model="name"
           placeholder="Name this query…"
@@ -191,6 +234,9 @@ async function remove(id: string) {
           @keyup.enter="save"
         />
         <button class="ghost" :disabled="saving" @click="save">Save</button>
+        <button v-if="editingId" class="ghost" :disabled="saving" @click="saveAsNew">
+          Save as new
+        </button>
       </div>
 
       <p class="sr-only" role="status" aria-live="polite">{{ status }}</p>
@@ -295,6 +341,34 @@ async function remove(id: string) {
 .save-input {
   width: auto;
   min-width: 200px;
+}
+.editing-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: 4px 6px 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  font-size: var(--text-xs);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.chip-clear {
+  --btn-bg: transparent;
+  --btn-fg: var(--text-3);
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  line-height: 1;
+}
+.chip-clear:hover {
+  --btn-bg: var(--surface-3);
+  --btn-fg: var(--text);
+  transform: none;
 }
 .kbd-hint {
   display: inline-flex;
