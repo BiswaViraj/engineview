@@ -29,7 +29,7 @@ const bars = [92, 64, 47, 38, 29, 22, 16, 11];
         <h1 class="hero-title">The dashboard Cloudflare Analytics Engine never shipped.</h1>
         <p class="hero-sub">
           Connect your Cloudflare account, write SQL against your Analytics Engine datasets, save
-          the queries you reuse, and build charts and dashboards. Runs entirely on your own
+          the queries you reuse, and build dashboards, all organized per app or product. Runs entirely on your own
           infrastructure.
         </p>
         <div class="hero-cta">
@@ -98,8 +98,9 @@ const bars = [92, 64, 47, 38, 29, 22, 16, 11];
         <span class="eyebrow">Visualize</span>
         <h2>Charts and dashboards</h2>
         <p>
-          Turn any result into a line, area, or bar chart. Pin saved queries as panels on a
-          dashboard with a shared time range, driven by a simple <code>$SINCE</code> macro.
+          Turn any result into a line, area, or bar chart, then pin saved queries as dashboard
+          panels with a shared time range driven by a simple <code>$SINCE</code> macro. Every query
+          and dashboard lives under its own app.
         </p>
         <div class="chart-mini">
           <div v-for="(h, i) in bars.slice(0, 6)" :key="i" :style="{ height: `${h}%` }" />
@@ -127,6 +128,7 @@ const bars = [92, 64, 47, 38, 29, 22, 16, 11];
 
     <!-- Capability strip ---------------------------------------------------->
     <section class="caps">
+      <span class="cap">Apps &amp; workspaces</span>
       <span class="cap">Saved queries</span>
       <span class="cap">CSV export</span>
       <span class="cap">Multi-user accounts</span>
