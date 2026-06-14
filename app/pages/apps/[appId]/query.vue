@@ -39,6 +39,10 @@ const { data: saved, refresh: refreshSaved } = await useFetch<SavedQuery[]>(
 const { data: connections } = await useFetch<{ id: string; label: string }[]>("/api/connections", {
   default: () => [],
 });
+const { data: dashboards } = await useFetch<{ id: string; name: string }[]>(
+  `/api/dashboards?appId=${appId}`,
+  { default: () => [] },
+);
 const connectionLabel = computed(
   () => connections.value.find((c) => c.id === appData.value?.connectionId)?.label ?? "",
 );
@@ -46,6 +50,7 @@ const connectionLabel = computed(
 const sql = ref("");
 const name = ref("");
 const editingId = ref<string | null>(null);
+const nameInput = ref<HTMLInputElement | null>(null);
 const result = ref<QueryResult | null>(null);
 const running = ref(false);
 const saving = ref(false);
@@ -178,6 +183,87 @@ function clearEditing() {
   name.value = "";
 }
 
+// --- Add to dashboard --------------------------------------------------------
+const showAdd = ref(false);
+const newDashName = ref("");
+const addingPanel = ref(false);
+const addRoot = ref<HTMLElement | null>(null);
+
+function toggleAdd() {
+  showAdd.value = !showAdd.value;
+  if (!showAdd.value) newDashName.value = "";
+}
+function closeAdd() {
+  showAdd.value = false;
+  newDashName.value = "";
+}
+
+// A panel needs a saved query; if the current one is unsaved, save it first
+// (nudging the user to name it). Returns the query id, or null if we bailed.
+async function ensureSavedQueryId(): Promise<string | null> {
+  if (editingId.value) return editingId.value;
+  const trimmed = name.value.trim();
+  if (!trimmed) {
+    nameInput.value?.focus();
+    return null;
+  }
+  const created = await createQuery(trimmed);
+  editingId.value = created.id;
+  await refreshSaved();
+  return created.id;
+}
+
+async function addPanelTo(dashId: string): Promise<void> {
+  const qId = await ensureSavedQueryId();
+  if (!qId) return;
+  const type = view.value === "table" ? "table" : chartType.value;
+  await $fetch(`/api/dashboards/${dashId}/panels`, {
+    method: "POST",
+    body: { queryId: qId, title: name.value.trim() || "Panel", chartType: type },
+  });
+  await navigateTo(`/apps/${appId}/dashboards/${dashId}`);
+}
+
+async function addToDashboard(dashId: string) {
+  if (!sql.value.trim() || addingPanel.value) return;
+  addingPanel.value = true;
+  try {
+    await addPanelTo(dashId);
+  } finally {
+    addingPanel.value = false;
+  }
+}
+
+async function createDashboardAndAdd() {
+  const dn = newDashName.value.trim();
+  if (!dn || !sql.value.trim() || addingPanel.value) return;
+  addingPanel.value = true;
+  try {
+    const d = await $fetch<{ id: string }>("/api/dashboards", {
+      method: "POST",
+      body: { name: dn, appId },
+    });
+    await addPanelTo(d.id);
+  } finally {
+    addingPanel.value = false;
+  }
+}
+
+function onDocClick(e: MouseEvent) {
+  if (showAdd.value && addRoot.value && !addRoot.value.contains(e.target as Node)) closeAdd();
+}
+function onKey(e: KeyboardEvent) {
+  if (e.key === "Escape") closeAdd();
+}
+onMounted(() => {
+  document.addEventListener("click", onDocClick);
+  document.addEventListener("keydown", onKey);
+});
+onBeforeUnmount(() => {
+  document.removeEventListener("click", onDocClick);
+  document.removeEventListener("keydown", onKey);
+});
+
 async function remove(id: string) {
   await $fetch(`/api/queries/${id}`, { method: "DELETE" });
   await refreshSaved();
@@ -227,6 +313,7 @@ async function remove(id: string) {
           </button>
         </span>
         <input
+          ref="nameInput"
           v-model="name"
           placeholder="Name this query…"
           class="save-input"
@@ -237,6 +324,45 @@ async function remove(id: string) {
         <button v-if="editingId" class="ghost" :disabled="saving" @click="saveAsNew">
           Save as new
         </button>
+        <div ref="addRoot" class="add-dash">
+          <button class="ghost" :disabled="addingPanel" @click="toggleAdd">
+            Add to dashboard
+            <svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true" class="caret">
+              <path
+                d="M2 4l3 3 3-3"
+                stroke="currentColor"
+                stroke-width="1.3"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <div v-if="showAdd" class="add-menu">
+            <button
+              v-for="d in dashboards"
+              :key="d.id"
+              type="button"
+              class="add-menu-item"
+              :disabled="addingPanel"
+              @click="addToDashboard(d.id)"
+            >
+              {{ d.name }}
+            </button>
+            <p v-if="!dashboards.length" class="add-menu-empty muted">No dashboards yet.</p>
+            <div class="add-menu-new">
+              <input
+                v-model="newDashName"
+                placeholder="New dashboard…"
+                aria-label="New dashboard name"
+                @keyup.enter="createDashboardAndAdd"
+              />
+              <button :disabled="addingPanel || !newDashName.trim()" @click="createDashboardAndAdd">
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <p class="sr-only" role="status" aria-live="polite">{{ status }}</p>
@@ -369,6 +495,57 @@ async function remove(id: string) {
   --btn-bg: var(--surface-3);
   --btn-fg: var(--text);
   transform: none;
+}
+
+.add-dash {
+  position: relative;
+}
+.caret {
+  opacity: 0.7;
+}
+.add-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  min-width: 220px;
+  display: grid;
+  gap: 1px;
+  padding: var(--space-2xs);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+}
+.add-menu-item {
+  --btn-bg: transparent;
+  --btn-fg: var(--text-2);
+  justify-content: flex-start;
+  text-align: left;
+  padding: 7px 10px;
+  font-weight: 500;
+}
+.add-menu-item:hover {
+  --btn-bg: var(--surface-3);
+  --btn-fg: var(--text);
+  transform: none;
+}
+.add-menu-empty {
+  padding: 6px 10px;
+}
+.add-menu-new {
+  display: flex;
+  gap: var(--space-2xs);
+  padding-top: var(--space-2xs);
+  margin-top: var(--space-2xs);
+  border-top: 1px solid var(--line-soft);
+}
+.add-menu-new input {
+  min-width: 0;
+  flex: 1;
+}
+.add-menu-new button {
+  flex-shrink: 0;
 }
 .kbd-hint {
   display: inline-flex;
