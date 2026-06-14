@@ -84,6 +84,27 @@ async function toggleWidth() {
   await $fetch(`/api/panels/${props.panel.id}`, { method: "PUT", body: { posW: next } });
   emit("updated");
 }
+
+const editing = ref(false);
+const editTitle = ref("");
+const editType = ref<string>(props.panel.chartType);
+
+function openEdit() {
+  editTitle.value = props.panel.title;
+  editType.value = props.panel.chartType;
+  editing.value = true;
+}
+
+async function saveEdit() {
+  const title = editTitle.value.trim();
+  if (!title) return;
+  await $fetch(`/api/panels/${props.panel.id}`, {
+    method: "PUT",
+    body: { title, chartType: editType.value },
+  });
+  editing.value = false;
+  emit("updated");
+}
 </script>
 
 <template>
@@ -98,10 +119,30 @@ async function toggleWidth() {
         >
           CSV
         </button>
+        <button class="ghost" @click="openEdit">Edit</button>
         <button class="ghost" @click="toggleWidth">{{ panel.posW >= 12 ? "Half" : "Full" }}</button>
         <ConfirmButton label="Remove" @confirm="remove" />
       </div>
     </header>
+
+    <div v-if="editing" class="panel-edit">
+      <input
+        v-model="editTitle"
+        class="panel-edit-title"
+        aria-label="Panel title"
+        maxlength="80"
+        @keyup.enter="saveEdit"
+      />
+      <select v-model="editType" aria-label="Chart type" class="panel-edit-type">
+        <option value="line">Line</option>
+        <option value="area">Area</option>
+        <option value="bar">Bar</option>
+        <option value="stat">Stat</option>
+        <option value="table">Table</option>
+      </select>
+      <button @click="saveEdit">Save</button>
+      <button class="ghost" @click="editing = false">Cancel</button>
+    </div>
     <p v-if="loading" class="muted panel-status">Loading…</p>
     <div v-else-if="error" class="panel-error" role="alert">
       <div class="panel-error-head">
@@ -185,6 +226,24 @@ async function toggleWidth() {
   min-height: 80px;
   display: grid;
   place-items: center;
+}
+.panel-edit {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.panel-edit-title {
+  flex: 1;
+  min-width: 120px;
+}
+.panel-edit-type {
+  width: auto;
+  flex-shrink: 0;
+}
+.panel-edit button {
+  padding: 6px 12px;
+  font-size: var(--text-xs);
 }
 .panel-error {
   display: grid;
