@@ -104,7 +104,20 @@ async function toggleWidth() {
     </header>
     <p v-if="loading" class="muted panel-status">Loading…</p>
     <div v-else-if="error" class="panel-error" role="alert">
-      <pre class="error">{{ error }}</pre>
+      <div class="panel-error-head">
+        <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true" class="panel-error-icon">
+          <path
+            d="M8 1.5 15 14H1L8 1.5Z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linejoin="round"
+          />
+          <path d="M8 6.5v3.2M8 11.6h.01" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+        </svg>
+        <span>Couldn't load this panel</span>
+      </div>
+      <p class="panel-error-msg">{{ error }}</p>
       <button v-if="panel.connectionId" class="ghost" @click="load">Retry</button>
     </div>
     <template v-else>
@@ -177,5 +190,28 @@ async function toggleWidth() {
   display: grid;
   gap: var(--space-sm);
   justify-items: start;
+}
+.panel-error-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+.panel-error-icon {
+  color: var(--danger);
+  flex-shrink: 0;
+}
+.panel-error-msg {
+  margin: 0;
+  max-width: 100%;
+  max-height: 5.5em;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--text-3);
+  white-space: pre-wrap;
 }
 </style>
