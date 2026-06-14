@@ -1,14 +1,21 @@
 <script setup lang="ts">
+import { downloadCsv } from "~/lib/csv";
+
 interface ColumnMeta {
   name: string;
   type: string;
 }
 
-const props = defineProps<{
-  rows: Record<string, unknown>[];
-  meta: ColumnMeta[];
-  elapsedMs: number;
-}>();
+const props = withDefaults(
+  defineProps<{
+    rows: Record<string, unknown>[];
+    meta: ColumnMeta[];
+    elapsedMs?: number;
+    compact?: boolean;
+    maxHeight?: string;
+  }>(),
+  { elapsedMs: undefined, compact: false, maxHeight: "62vh" },
+);
 
 const NUMERIC = /int|float|double|decimal|number/i;
 
@@ -31,25 +38,20 @@ function cell(value: unknown): string {
 }
 
 function download() {
-  const escape = (v: unknown) => {
-    const s = cell(v);
-    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  };
-  const header = cols.value.map((c) => escape(c.name)).join(",");
-  const body = props.rows.map((r) => cols.value.map((c) => escape(r[c.name])).join(","));
-  const blob = new Blob([[header, ...body].join("\n")], { type: "text/csv" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "engineview-results.csv";
-  a.click();
-  URL.revokeObjectURL(a.href);
+  downloadCsv(
+    "engineview-results.csv",
+    cols.value.map((c) => c.name),
+    props.rows,
+  );
 }
 </script>
 
 <template>
-  <p v-if="rows.length === 0" class="muted">No rows. The query ran in {{ elapsedMs }} ms.</p>
+  <p v-if="rows.length === 0" class="muted">
+    No rows.<template v-if="elapsedMs != null"> The query ran in {{ elapsedMs }} ms.</template>
+  </p>
   <div v-else class="stack">
-    <div class="result-bar">
+    <div v-if="!compact" class="result-bar">
       <span class="stat"
         ><b>{{ fmt(rows.length) }}</b> row{{ rows.length === 1 ? "" : "s" }}</span
       >
@@ -67,7 +69,7 @@ function download() {
         Download CSV
       </button>
     </div>
-    <div class="table-scroll">
+    <div class="table-scroll" :style="{ maxHeight }">
       <table>
         <thead>
           <tr>
@@ -113,7 +115,6 @@ function download() {
 }
 .table-scroll {
   overflow: auto;
-  max-height: 62vh;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-lg);
 }
