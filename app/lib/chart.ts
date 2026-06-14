@@ -2,7 +2,7 @@
 // any framework so it can be unit-tested and reused by the runner and dashboard
 // panels.
 
-export type ChartType = "line" | "bar" | "area" | "stat";
+export type ChartType = "line" | "bar" | "area" | "stat" | "table";
 
 export interface ChartSeries {
   labels: (string | number)[];

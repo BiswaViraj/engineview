@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   appCreateSchema,
   appUpdateSchema,
+  chartTypeSchema,
   dashboardCreateSchema,
   savedQueryCreateSchema,
 } from "../server/utils/schemas";
@@ -32,6 +33,14 @@ describe("appUpdateSchema", () => {
   it("allows partial and empty updates", () => {
     expect(appUpdateSchema.safeParse({}).success).toBe(true);
     expect(appUpdateSchema.safeParse({ name: "Renamed" }).success).toBe(true);
+  });
+});
+
+describe("chartTypeSchema", () => {
+  it("accepts table and rejects unknown types", () => {
+    expect(chartTypeSchema.safeParse("table").success).toBe(true);
+    expect(chartTypeSchema.safeParse("line").success).toBe(true);
+    expect(chartTypeSchema.safeParse("pie").success).toBe(false);
   });
 });
 
