@@ -76,9 +76,10 @@ async function removeDashboard() {
     </p>
   </div>
   <div v-else-if="data" class="stack">
+    <AppSubnav :app-id="appId" />
     <div class="dash-head">
       <div class="dash-title">
-        <span class="eyebrow">Dashboard</span>
+        <NuxtLink :to="`/apps/${appId}/dashboards`" class="crumb">‹ Dashboards</NuxtLink>
         <h1>{{ data.dashboard.name }}</h1>
       </div>
       <span class="spacer" />
@@ -150,6 +151,15 @@ async function removeDashboard() {
   display: grid;
   gap: var(--space-2xs);
   min-width: 0;
+}
+.crumb {
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  width: fit-content;
+}
+.crumb:hover {
+  color: var(--text);
+  text-decoration: none;
 }
 .dash-title h1 {
   margin: 0;
