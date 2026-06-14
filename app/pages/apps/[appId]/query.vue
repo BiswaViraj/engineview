@@ -325,7 +325,13 @@ async function remove(id: string) {
           Save as new
         </button>
         <div ref="addRoot" class="add-dash">
-          <button class="ghost" :disabled="addingPanel" @click="toggleAdd">
+          <button
+            class="ghost"
+            :disabled="addingPanel"
+            aria-haspopup="menu"
+            :aria-expanded="showAdd"
+            @click="toggleAdd"
+          >
             Add to dashboard
             <svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true" class="caret">
               <path
@@ -495,6 +501,13 @@ async function remove(id: string) {
   --btn-bg: var(--surface-3);
   --btn-fg: var(--text);
   transform: none;
+}
+/* Keep the inline clear button compact even where the global coarse-pointer
+   rule bumps buttons to a 44px target. */
+@media (pointer: coarse) {
+  .chip-clear {
+    min-height: 0;
+  }
 }
 
 .add-dash {
