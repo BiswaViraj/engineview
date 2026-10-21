@@ -52,11 +52,11 @@ charts and stat tiles, and multi-panel dashboards are all in place.
 
 ## Setup
 
-Prerequisites: Node 20+, a Postgres database, and a Cloudflare account using
+Prerequisites: Node 24+ with pnpm (`corepack enable`), a Postgres database, and a Cloudflare account using
 Analytics Engine.
 
 ```bash
-npm install
+pnpm install
 
 # 1. Configure the environment
 cp .env.example .env
@@ -64,10 +64,10 @@ cp .env.example .env
 #    Generate secrets with: openssl rand -hex 32
 
 # 2. Apply the database schema
-npm run db:migrate
+pnpm db:migrate
 
 # 3. Run locally
-npm run dev
+pnpm dev
 ```
 
 A local Postgres is easy to start with Docker:
@@ -77,15 +77,15 @@ docker run -d --name engineview-pg -e POSTGRES_PASSWORD=postgres \
   -e POSTGRES_DB=engineview -p 5432:5432 postgres:16
 ```
 
-On macOS, if `npm run dev` fails with a `vite-node` socket error (`EINVAL`),
+On macOS, if `pnpm dev` fails with a `vite-node` socket error (`EINVAL`),
 your `$TMPDIR` path is too long for a unix socket. Run it with a short temp dir:
-`TMPDIR=/tmp npm run dev`.
+`TMPDIR=/tmp pnpm dev`.
 
 ## Scripts
 
-- `npm run dev` / `npm run build` / `npm run preview`
-- `npm run db:migrate` (apply migrations), `npm run db:generate` (after a schema change)
-- `npm run lint`, `npm run format`, `npm run typecheck`, `npm test`
+- `pnpm dev` / `pnpm build` / `pnpm preview`
+- `pnpm db:migrate` (apply migrations), `pnpm db:generate` (after a schema change)
+- `pnpm lint`, `pnpm format`, `pnpm typecheck`, `pnpm test`
 
 ## Deploy
 
@@ -114,9 +114,9 @@ app starts, and `GET /api/health` reports database connectivity.
 ### Manual
 
 ```bash
-npm ci
-npm run build
-npm run db:migrate          # against your production DATABASE_URL
+pnpm install --frozen-lockfile
+pnpm build
+pnpm db:migrate          # against your production DATABASE_URL
 node .output/server/index.mjs
 ```
 
