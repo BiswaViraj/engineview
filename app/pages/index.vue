@@ -29,8 +29,8 @@ const bars = [92, 64, 47, 38, 29, 22, 16, 11];
         <h1 class="hero-title">The dashboard Cloudflare Analytics Engine never shipped.</h1>
         <p class="hero-sub">
           Connect your Cloudflare account, write SQL against your Analytics Engine datasets, save
-          the queries you reuse, and build dashboards, all organized per app or product. Runs entirely on your own
-          infrastructure.
+          the queries you reuse, and build dashboards, all organized per app or product. Runs
+          entirely on your own infrastructure.
         </p>
         <div class="hero-cta">
           <NuxtLink v-if="session" to="/apps"><button>Open app</button></NuxtLink>

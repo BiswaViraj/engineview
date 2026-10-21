@@ -154,7 +154,12 @@ async function saveEdit() {
             stroke-width="1.3"
             stroke-linejoin="round"
           />
-          <path d="M8 6.5v3.2M8 11.6h.01" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+          <path
+            d="M8 6.5v3.2M8 11.6h.01"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+          />
         </svg>
         <span>Couldn't load this panel</span>
       </div>
