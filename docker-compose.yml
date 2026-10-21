@@ -1,7 +1,8 @@
-# Run the whole stack with `docker compose up`. Set BETTER_AUTH_SECRET and
-# ENCRYPTION_KEY first (e.g. in a .env file next to this one):
+# Run the whole stack with `docker compose up`. Set BETTER_AUTH_SECRET,
+# ENCRYPTION_KEY and RESEND_API_KEY first (e.g. in a .env file next to this one):
 #   BETTER_AUTH_SECRET=$(openssl rand -hex 32)
 #   ENCRYPTION_KEY=$(openssl rand -hex 32)
+#   RESEND_API_KEY=re_...   (the app sends verification and reset emails)
 
 services:
   db:
@@ -37,6 +38,8 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:?set ENCRYPTION_KEY}
+      RESEND_API_KEY: ${RESEND_API_KEY:?set RESEND_API_KEY}
+      EMAIL_FROM: ${EMAIL_FROM:-}
     ports:
       - "3000:3000"
     depends_on:
