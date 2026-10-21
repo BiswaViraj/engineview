@@ -24,10 +24,24 @@ describe("validateEnv", () => {
     expect(() => validateEnv({ ...VALID, ENCRYPTION_KEY: "z".repeat(64) })).toThrow(/64 hex/);
   });
 
-  it("requires RESEND_API_KEY in production", () => {
-    expect(() => validateEnv({ ...VALID, NODE_ENV: "production" })).toThrow(/RESEND_API_KEY/);
+  it("requires RESEND_API_KEY and EMAIL_FROM in production", () => {
+    expect(() => validateEnv({ ...VALID, NODE_ENV: "production" })).toThrow(
+      /RESEND_API_KEY, EMAIL_FROM/,
+    );
     expect(() =>
       validateEnv({ ...VALID, NODE_ENV: "production", RESEND_API_KEY: "re_test" }),
+    ).toThrow(/EMAIL_FROM/);
+    expect(() =>
+      validateEnv({
+        ...VALID,
+        NODE_ENV: "production",
+        RESEND_API_KEY: "re_test",
+        EMAIL_FROM: "EngineView <auth@example.com>",
+      }),
     ).not.toThrow();
+  });
+
+  it("does not require email settings outside production", () => {
+    expect(() => validateEnv(VALID)).not.toThrow();
   });
 });

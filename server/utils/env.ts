@@ -11,10 +11,13 @@ const REQUIRED = [
 
 export function validateEnv(env: Record<string, string | undefined> = process.env): void {
   const missing: string[] = REQUIRED.filter((key) => !env[key]);
-  // Email verification is enforced, so a real provider is required in
-  // production. In development a missing key just logs links to the console.
-  if (env.NODE_ENV === "production" && !env.RESEND_API_KEY) {
-    missing.push("RESEND_API_KEY");
+  // Email verification is enforced, so a real provider and a sender on a
+  // verified domain are required in production. Resend's default test sender
+  // only delivers to the account owner. In development a missing key just logs
+  // links to the console.
+  if (env.NODE_ENV === "production") {
+    if (!env.RESEND_API_KEY) missing.push("RESEND_API_KEY");
+    if (!env.EMAIL_FROM) missing.push("EMAIL_FROM");
   }
   if (missing.length > 0) {
     throw new Error(
