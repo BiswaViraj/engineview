@@ -22,7 +22,7 @@ services:
     build:
       context: .
       target: build
-    command: npm run db:migrate
+    command: pnpm db:migrate
     environment:
       DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/engineview
     depends_on:
