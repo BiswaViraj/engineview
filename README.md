@@ -103,6 +103,8 @@ The simplest way to run the whole stack (Postgres, migrations, app):
 ```bash
 export BETTER_AUTH_SECRET=$(openssl rand -hex 32)
 export ENCRYPTION_KEY=$(openssl rand -hex 32)
+export RESEND_API_KEY=re_...   # from your Resend account
+export EMAIL_FROM="EngineView <auth@yourdomain.com>"   # a domain verified in Resend
 docker compose up --build
 ```
 
@@ -118,8 +120,9 @@ npm run db:migrate          # against your production DATABASE_URL
 node .output/server/index.mjs
 ```
 
-Set `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` and `ENCRYPTION_KEY`
-in the environment. The server validates them on startup and exits with a clear
+Set `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `ENCRYPTION_KEY`,
+`RESEND_API_KEY` and `EMAIL_FROM` (a sender on a domain verified in Resend) in the
+environment. The server validates them on startup and exits with a clear
 message if any are missing. Run it behind a reverse proxy that terminates TLS and
 forwards the client IP (`x-forwarded-for` or `cf-connecting-ip`) so rate limiting
 works.
